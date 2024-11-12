@@ -2,14 +2,16 @@ version: '3.8'
 services:
   metrics-api:
     build:
-      context: .
-      target: metrics-api
+      context: .. # 상위 디렉토리를 context로 지정
+      dockerfile: deployments/Dockerfile
+      target: metrics-api #Dockerfile 의 "AS metrics-api" 스테이지를 사용
     ports:
       - "8080:8080"
 
 
   metrics-collector:
     build:
-      context: .
-      target: metrics-collector
+      context: ..
+      dockerfile: deployments/Dockerfile
+      target: metrics-collector #Dockerfile 의 "AS metrics-collector" 스테이지를 사용
 
