@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  metrics-api:
+    build:
+      context: .
+      target: metrics-api
+    ports:
+      - "8080:8080"
+
+
+  metrics-collector:
+    build:
+      context: .
+      target: metrics-collector
+
