@@ -1,0 +1,74 @@
+syntax = "proto3";
+package metrics.v1;  // v1 추가
+option go_package = "github.com/aspyn/metrics_proto/gen/go/metrics/v1";  // 경로 수정
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Metrics API";
+    version: "1.0";
+    description: "";
+    contact: {
+      name: "gRPC-Metrics Project";
+      url: "https://github.com/violetaplum/go-metric-watcher";
+      email: "violetaplume@gmail.com";
+    };
+  }
+  schemes: [HTTPS, HTTP];
+  consumes: "application/json";
+  produces: "application/json";  // produces 추가
+};
+
+service MetricsService {
+  rpc CollectMetrics(stream Metric) returns (CollectResponse) {
+    option (google.api.http) = {
+      post: "/v1/metrics/collect"
+      body: "*"
+    };
+  }
+  rpc GetMetrics(MetricsRequest) returns (stream MetricsResponse) {
+    option (google.api.http) = {
+      get: "/v1/metrics"
+    };
+  }
+  rpc GetAggregatedMetrics(AggregationRequest) returns (AggregationResponse) {
+    option (google.api.http) = {
+      get: "/v1/metrics/aggregated"
+    };
+  }
+}
+
+
+message Metric {
+  string name = 1;
+  double value = 2;
+  map<string, string> labels = 3;
+  int64 timestamp = 4;
+}
+
+message MetricsRequest {
+  string metric_name = 1;
+  int64 from_timestamp = 2;
+  int64 to_timestamp = 3;
+}
+
+message CollectResponse {
+
+}
+
+message MetricsResponse {
+
+}
+
+message AggregationRequest {
+
+}
+
+message AggregationResponse {
+
+}
