@@ -13,3 +13,4 @@ scrape_configs:
   - job_name: 'metrics-api'
     static_configs:
       - targets: ['metrics-api:8080']
+    metrics_path: '/api/v1/metrics'

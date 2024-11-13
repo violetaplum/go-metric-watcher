@@ -25,19 +25,22 @@ services:
       - grafana
 
   timescaledb:
-    image: timescale/timescaledb:2.11.2-pg14
+    image: timescale/timescaledb:2.8.1-pg14
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
 #      - POSTGRES_DB=metrics_db
+      - TIMESCALEDB_PRELOAD_SHARED_LIBRARIES=timescaledb
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d  # 초기화 스크립트 경로
+    networks:
+      - monitoring
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U postgres -d metrics_db"]
+      interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
@@ -48,6 +51,8 @@ services:
       - "9090:9090"
     volumes:
       - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     depends_on:
@@ -66,6 +71,8 @@ services:
       - TS_PROM_DB_NAME=metrics_db
       - TS_PROM_DB_SSL_MODE=disable
       - TS_PROM_DB="postgres://postgres:password@timescaledb:5432/metrics_db?sslmode=disable"
+    networks:
+      - monitoring
     depends_on:
       timescaledb:
         condition: service_healthy
@@ -87,6 +94,11 @@ services:
       - timescaledb
       - prometheus
       - prometheus-adapter
+
+# 네트워크 정의
+networks:
+  monitoring:
+    driver: bridge
 
 
 volumes:
