@@ -7,13 +7,22 @@ services:
       target: metrics-api #Dockerfile 의 "AS metrics-api" 스테이지를 사용
     ports:
       - "8080:8080"
-
+    depends_on:
+      - timescaledb
+      - prometheus
+      - prometheus-adapter
+      - grafana
 
   metrics-collector:
     build:
       context: ..
       dockerfile: deployments/Dockerfile
       target: metrics-collector #Dockerfile 의 "AS metrics-collector" 스테이지를 사용
+    depends_on:
+      - timescaledb
+      - prometheus
+      - prometheus-adapter
+      - grafana
 
   timescaledb:
     image: timescale/timescaledb:latest-pg14
@@ -25,3 +34,48 @@ services:
       - POSTGRES_DB=metrics
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--remote.write.url=http://prometheus-adapter:9201/write'
+    depends_on:
+      - timescaledb
+
+  prometheus-adapter:
+    image: timescale/timescale-prometheus:latest
+    ports:
+      - "9201:9201"
+    environment:
+      - TS_PROM_DB_CONNECT_RETRIES=10
+      - TS_PROM_DB=postgres://postgres:passward@timescaledb:5432/metrics?sslmode=disable
+    depends_on:
+      - timescaledb
+      - prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - timescaledb
+      - prometheus
+      - prometheus-adapter
+
+
+volumes:
+  timescaledb_data: # TimescaleDB용 볼륨
+  grafana_data:     # Grafana용 볼륨
+
