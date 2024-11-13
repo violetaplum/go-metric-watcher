@@ -15,3 +15,13 @@ services:
       dockerfile: deployments/Dockerfile
       target: metrics-collector #Dockerfile 의 "AS metrics-collector" 스테이지를 사용
 
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=metrics
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
