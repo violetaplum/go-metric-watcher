@@ -25,15 +25,22 @@ services:
       - grafana
 
   timescaledb:
-    image: timescale/timescaledb:latest-pg14
+    image: timescale/timescaledb:2.11.2-pg14
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=metrics
+#      - POSTGRES_DB=metrics_db
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d  # 초기화 스크립트 경로
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   prometheus:
     image: prom/prometheus:latest
@@ -43,20 +50,27 @@ services:
       - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--remote.write.url=http://prometheus-adapter:9201/write'
     depends_on:
       - timescaledb
 
   prometheus-adapter:
-    image: timescale/timescale-prometheus:latest
+    image: timescale/timescale-prometheus:0.1.0-beta.4
     ports:
       - "9201:9201"
     environment:
       - TS_PROM_DB_CONNECT_RETRIES=10
-      - TS_PROM_DB=postgres://postgres:passward@timescaledb:5432/metrics?sslmode=disable
+      - TS_PROM_DB_HOST=timescaledb
+      - TS_PROM_DB_PORT=5432
+      - TS_PROM_DB_USER=postgres
+      - TS_PROM_DB_PASSWORD=password
+      - TS_PROM_DB_NAME=metrics_db
+      - TS_PROM_DB_SSL_MODE=disable
+      - TS_PROM_DB="postgres://postgres:password@timescaledb:5432/metrics_db?sslmode=disable"
     depends_on:
-      - timescaledb
-      - prometheus
+      timescaledb:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
 
   grafana:
     image: grafana/grafana:latest

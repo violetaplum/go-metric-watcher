@@ -1,5 +1,11 @@
--- deployments/init-scripts/01-init.sql
-CREATE EXTENSION IF NOT EXISTS timescaledb;
+-- 기존 DB 삭제 및 생성 (필요한 경우)
+DROP DATABASE IF EXISTS metrics_db;
+CREATE DATABASE metrics_db;
+
+\c metrics_db
+
+-- TimescaleDB 확장 설치
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 
 -- 메트릭 데이터를 저장할 테이블 생성
 CREATE TABLE metrics (
