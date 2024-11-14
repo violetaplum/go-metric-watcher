@@ -41,3 +41,6 @@ jobs:
           target: metrics-collector
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/metrics-collector:${{ github.sha }}
+
+# 현재는 사용되지 않는중 이미지만 docker hub 에 올려놓는다
+
