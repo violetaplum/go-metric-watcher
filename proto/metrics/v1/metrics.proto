@@ -25,50 +25,130 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service MetricsService {
-  rpc CollectMetrics(stream Metric) returns (CollectResponse) {
+  rpc StreamMetrics(StreamMetricsRequest) returns (StreamMetricsResponse) {
     option (google.api.http) = {
-      post: "/v1/metrics/collect"
+      get: "/api/v1/metrics/stream"
+    };
+  }
+  rpc GetMetricHistory(MetricHistoryRequest) returns (MetricHistoryResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/metrics/history"
+    };
+  }
+  rpc ConfigureAlert(ConfigureAlertRequest) returns (ConfigureAlertResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/metrics/alert/configure"
       body: "*"
     };
   }
-  rpc GetMetrics(MetricsRequest) returns (stream MetricsResponse) {
+
+  rpc GetDashboardMetrics(GetDashboardMetricsRequest) returns (GetDashboardMetricsResponse) {
     option (google.api.http) = {
-      get: "/v1/metrics"
-    };
-  }
-  rpc GetAggregatedMetrics(AggregationRequest) returns (AggregationResponse) {
-    option (google.api.http) = {
-      get: "/v1/metrics/aggregated"
+      get: "/api/v1/metrics/dasboard"
     };
   }
 }
 
 
-message Metric {
-  string name = 1;
+message SystemMetric {
+  string type = 1;                    // cpu, memory, disk 등
   double value = 2;
-  map<string, string> labels = 3;
-  int64 timestamp = 4;
+  map<string, string> labels = 3;     // 메트릭 레이블
+  string server_id = 4;
+  int64 timestamp = 5;
+  MetricUnit unit = 6;                // 단위
 }
 
-message MetricsRequest {
-  string metric_name = 1;
-  int64 from_timestamp = 2;
-  int64 to_timestamp = 3;
+enum MetricUnit {
+  UNIT_UNSPECIFIED = 0;
+  PERCENTAGE = 1;
+  BYTES = 2;
+  SECONDS = 3;
+  UNIT_COUNT = 4;        // COUNT -> UNIT_COUNT로 변경
+  BYTES_PER_SECOND = 5;
+}
+//    MetricUnit과 AggregationType enum에서 동일한 COUNT 이름을 사용하는 것이 문제가 되었네요.
+//    protobuf는 C++ 스코핑 규칙을 따르기 때문에 이름을 다르게 해야 합니다.
+
+message StreamMetricsRequest {
+  string server_id = 1;
+  repeated string metric_types = 2;
+  int32 interval_seconds = 3;
 }
 
-message CollectResponse {
-
+message StreamMetricsResponse {
+  repeated SystemMetric metrics = 1;
+  string status = 2;
 }
 
-message MetricsResponse {
-
+message MetricHistoryRequest {
+  string metric_type = 1;
+  string server_id = 2;
+  int64 start_time = 3;
+  int64 end_time = 4;
+  map<string, string> labels = 5;
 }
 
-message AggregationRequest {
-
+message MetricHistoryResponse {
+  repeated SystemMetric metrics = 1;
+  string metric_type = 2;
+  int64 total_count = 3;
 }
 
-message AggregationResponse {
+message AlertRule {
+  string metric_type = 1;
+  double threshold = 2;
+  string operator = 3;
+  int64 duration = 4;
+  string severity = 5;
+  repeated string channels = 6;
+}
 
+message ConfigureAlertRequest {
+  AlertRule alert_rule = 1;
+  string rule_id = 2;
+  string description = 3;
+  bool enabled = 4;
+}
+
+message ConfigureAlertResponse {
+  string rule_id = 1;
+  bool success = 2;
+  string message = 3;
+  AlertRule configured_rule = 4;
+}
+
+message GetDashboardMetricsRequest {
+  repeated string metric_types = 1;
+  int64 start_time = 2;
+  int64 end_time = 3;
+  string interval = 4;
+  map<string, string> labels = 5;
+  AggregationType aggregation = 6;
+}
+
+message GetDashboardMetricsResponse {
+  repeated MetricSeries series = 1;
+  map<string, string> meta = 2;
+}
+
+message MetricSeries {
+  string metric_type = 1;
+  map<string, string> labels = 2;
+  repeated DataPoint points = 3;
+  MetricUnit unit = 4;
+}
+
+message DataPoint {
+  int64 timestamp = 1;
+  double value = 2;
+}
+
+enum AggregationType {
+  AGGREGATION_UNSPECIFIED = 0;
+  AVG = 1;
+  SUM = 2;
+  MIN = 3;
+  MAX = 4;
+  COUNT = 5;
 }

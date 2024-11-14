@@ -11,12 +11,11 @@ import (
 	"net/mail"
 	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
 
-	"google.golang.org/protobuf/types/known/anypb"
+	"github.com/golang/protobuf/ptypes"
 )
 
 // ensure the imports are used
@@ -31,65 +30,35 @@ var (
 	_ = time.Duration(0)
 	_ = (*url.URL)(nil)
 	_ = (*mail.Address)(nil)
-	_ = anypb.Any{}
-	_ = sort.Sort
+	_ = ptypes.DynamicAny{}
 )
 
-// Validate checks the field values on Metric with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Metric) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Metric with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in MetricMultiError, or nil if none found.
-func (m *Metric) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Metric) validate(all bool) error {
+// Validate checks the field values on SystemMetric with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *SystemMetric) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
-
-	// no validation rules for Name
+	// no validation rules for Type
 
 	// no validation rules for Value
 
 	// no validation rules for Labels
 
+	// no validation rules for ServerId
+
 	// no validation rules for Timestamp
 
-	if len(errors) > 0 {
-		return MetricMultiError(errors)
-	}
+	// no validation rules for Unit
 
 	return nil
 }
 
-// MetricMultiError is an error wrapping multiple validation errors returned by
-// Metric.ValidateAll() if the designated constraints aren't met.
-type MetricMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m MetricMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m MetricMultiError) AllErrors() []error { return m }
-
-// MetricValidationError is the validation error returned by Metric.Validate if
-// the designated constraints aren't met.
-type MetricValidationError struct {
+// SystemMetricValidationError is the validation error returned by
+// SystemMetric.Validate if the designated constraints aren't met.
+type SystemMetricValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -97,22 +66,22 @@ type MetricValidationError struct {
 }
 
 // Field function returns field value.
-func (e MetricValidationError) Field() string { return e.field }
+func (e SystemMetricValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e MetricValidationError) Reason() string { return e.reason }
+func (e SystemMetricValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e MetricValidationError) Cause() error { return e.cause }
+func (e SystemMetricValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e MetricValidationError) Key() bool { return e.key }
+func (e SystemMetricValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e MetricValidationError) ErrorName() string { return "MetricValidationError" }
+func (e SystemMetricValidationError) ErrorName() string { return "SystemMetricValidationError" }
 
 // Error satisfies the builtin error interface
-func (e MetricValidationError) Error() string {
+func (e SystemMetricValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -124,14 +93,14 @@ func (e MetricValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sMetric.%s: %s%s",
+		"invalid %sSystemMetric.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = MetricValidationError{}
+var _ error = SystemMetricValidationError{}
 
 var _ interface {
 	Field() string
@@ -139,63 +108,675 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = MetricValidationError{}
+} = SystemMetricValidationError{}
 
-// Validate checks the field values on MetricsRequest with the rules defined in
-// the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *MetricsRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on MetricsRequest with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in MetricsRequestMultiError,
-// or nil if none found.
-func (m *MetricsRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *MetricsRequest) validate(all bool) error {
+// Validate checks the field values on StreamMetricsRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *StreamMetricsRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
+	// no validation rules for ServerId
 
-	// no validation rules for MetricName
+	// no validation rules for IntervalSeconds
 
-	// no validation rules for FromTimestamp
+	return nil
+}
 
-	// no validation rules for ToTimestamp
+// StreamMetricsRequestValidationError is the validation error returned by
+// StreamMetricsRequest.Validate if the designated constraints aren't met.
+type StreamMetricsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
 
-	if len(errors) > 0 {
-		return MetricsRequestMultiError(errors)
+// Field function returns field value.
+func (e StreamMetricsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StreamMetricsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StreamMetricsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StreamMetricsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StreamMetricsRequestValidationError) ErrorName() string {
+	return "StreamMetricsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StreamMetricsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStreamMetricsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StreamMetricsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StreamMetricsRequestValidationError{}
+
+// Validate checks the field values on StreamMetricsResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *StreamMetricsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetMetrics() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return StreamMetricsResponseValidationError{
+					field:  fmt.Sprintf("Metrics[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Status
+
+	return nil
+}
+
+// StreamMetricsResponseValidationError is the validation error returned by
+// StreamMetricsResponse.Validate if the designated constraints aren't met.
+type StreamMetricsResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StreamMetricsResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StreamMetricsResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StreamMetricsResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StreamMetricsResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StreamMetricsResponseValidationError) ErrorName() string {
+	return "StreamMetricsResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e StreamMetricsResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStreamMetricsResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StreamMetricsResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StreamMetricsResponseValidationError{}
+
+// Validate checks the field values on MetricHistoryRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MetricHistoryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for MetricType
+
+	// no validation rules for ServerId
+
+	// no validation rules for StartTime
+
+	// no validation rules for EndTime
+
+	// no validation rules for Labels
+
+	return nil
+}
+
+// MetricHistoryRequestValidationError is the validation error returned by
+// MetricHistoryRequest.Validate if the designated constraints aren't met.
+type MetricHistoryRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MetricHistoryRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MetricHistoryRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MetricHistoryRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MetricHistoryRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MetricHistoryRequestValidationError) ErrorName() string {
+	return "MetricHistoryRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MetricHistoryRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMetricHistoryRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MetricHistoryRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MetricHistoryRequestValidationError{}
+
+// Validate checks the field values on MetricHistoryResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *MetricHistoryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetMetrics() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MetricHistoryResponseValidationError{
+					field:  fmt.Sprintf("Metrics[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for MetricType
+
+	// no validation rules for TotalCount
+
+	return nil
+}
+
+// MetricHistoryResponseValidationError is the validation error returned by
+// MetricHistoryResponse.Validate if the designated constraints aren't met.
+type MetricHistoryResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e MetricHistoryResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e MetricHistoryResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e MetricHistoryResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e MetricHistoryResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e MetricHistoryResponseValidationError) ErrorName() string {
+	return "MetricHistoryResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e MetricHistoryResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sMetricHistoryResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = MetricHistoryResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = MetricHistoryResponseValidationError{}
+
+// Validate checks the field values on AlertRule with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *AlertRule) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for MetricType
+
+	// no validation rules for Threshold
+
+	// no validation rules for Operator
+
+	// no validation rules for Duration
+
+	// no validation rules for Severity
+
+	return nil
+}
+
+// AlertRuleValidationError is the validation error returned by
+// AlertRule.Validate if the designated constraints aren't met.
+type AlertRuleValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AlertRuleValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AlertRuleValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AlertRuleValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AlertRuleValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AlertRuleValidationError) ErrorName() string { return "AlertRuleValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AlertRuleValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAlertRule.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AlertRuleValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AlertRuleValidationError{}
+
+// Validate checks the field values on ConfigureAlertRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ConfigureAlertRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetAlertRule()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ConfigureAlertRequestValidationError{
+				field:  "AlertRule",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for RuleId
+
+	// no validation rules for Description
+
+	// no validation rules for Enabled
+
+	return nil
+}
+
+// ConfigureAlertRequestValidationError is the validation error returned by
+// ConfigureAlertRequest.Validate if the designated constraints aren't met.
+type ConfigureAlertRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConfigureAlertRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConfigureAlertRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConfigureAlertRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConfigureAlertRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConfigureAlertRequestValidationError) ErrorName() string {
+	return "ConfigureAlertRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConfigureAlertRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConfigureAlertRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConfigureAlertRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConfigureAlertRequestValidationError{}
+
+// Validate checks the field values on ConfigureAlertResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *ConfigureAlertResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for RuleId
+
+	// no validation rules for Success
+
+	// no validation rules for Message
+
+	if v, ok := interface{}(m.GetConfiguredRule()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ConfigureAlertResponseValidationError{
+				field:  "ConfiguredRule",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
 	}
 
 	return nil
 }
 
-// MetricsRequestMultiError is an error wrapping multiple validation errors
-// returned by MetricsRequest.ValidateAll() if the designated constraints
+// ConfigureAlertResponseValidationError is the validation error returned by
+// ConfigureAlertResponse.Validate if the designated constraints aren't met.
+type ConfigureAlertResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConfigureAlertResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConfigureAlertResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConfigureAlertResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConfigureAlertResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConfigureAlertResponseValidationError) ErrorName() string {
+	return "ConfigureAlertResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConfigureAlertResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConfigureAlertResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConfigureAlertResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConfigureAlertResponseValidationError{}
+
+// Validate checks the field values on GetDashboardMetricsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetDashboardMetricsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	// no validation rules for StartTime
+
+	// no validation rules for EndTime
+
+	// no validation rules for Interval
+
+	// no validation rules for Labels
+
+	// no validation rules for Aggregation
+
+	return nil
+}
+
+// GetDashboardMetricsRequestValidationError is the validation error returned
+// by GetDashboardMetricsRequest.Validate if the designated constraints aren't met.
+type GetDashboardMetricsRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetDashboardMetricsRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetDashboardMetricsRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetDashboardMetricsRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetDashboardMetricsRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetDashboardMetricsRequestValidationError) ErrorName() string {
+	return "GetDashboardMetricsRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetDashboardMetricsRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetDashboardMetricsRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetDashboardMetricsRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetDashboardMetricsRequestValidationError{}
+
+// Validate checks the field values on GetDashboardMetricsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, an error is returned.
+func (m *GetDashboardMetricsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	for idx, item := range m.GetSeries() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetDashboardMetricsResponseValidationError{
+					field:  fmt.Sprintf("Series[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Meta
+
+	return nil
+}
+
+// GetDashboardMetricsResponseValidationError is the validation error returned
+// by GetDashboardMetricsResponse.Validate if the designated constraints
 // aren't met.
-type MetricsRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m MetricsRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m MetricsRequestMultiError) AllErrors() []error { return m }
-
-// MetricsRequestValidationError is the validation error returned by
-// MetricsRequest.Validate if the designated constraints aren't met.
-type MetricsRequestValidationError struct {
+type GetDashboardMetricsResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -203,22 +784,24 @@ type MetricsRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e MetricsRequestValidationError) Field() string { return e.field }
+func (e GetDashboardMetricsResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e MetricsRequestValidationError) Reason() string { return e.reason }
+func (e GetDashboardMetricsResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e MetricsRequestValidationError) Cause() error { return e.cause }
+func (e GetDashboardMetricsResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e MetricsRequestValidationError) Key() bool { return e.key }
+func (e GetDashboardMetricsResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e MetricsRequestValidationError) ErrorName() string { return "MetricsRequestValidationError" }
+func (e GetDashboardMetricsResponseValidationError) ErrorName() string {
+	return "GetDashboardMetricsResponseValidationError"
+}
 
 // Error satisfies the builtin error interface
-func (e MetricsRequestValidationError) Error() string {
+func (e GetDashboardMetricsResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -230,14 +813,14 @@ func (e MetricsRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sMetricsRequest.%s: %s%s",
+		"invalid %sGetDashboardMetricsResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = MetricsRequestValidationError{}
+var _ error = GetDashboardMetricsResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -245,57 +828,43 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = MetricsRequestValidationError{}
+} = GetDashboardMetricsResponseValidationError{}
 
-// Validate checks the field values on CollectResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *CollectResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on CollectResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// CollectResponseMultiError, or nil if none found.
-func (m *CollectResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *CollectResponse) validate(all bool) error {
+// Validate checks the field values on MetricSeries with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *MetricSeries) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
+	// no validation rules for MetricType
 
-	if len(errors) > 0 {
-		return CollectResponseMultiError(errors)
+	// no validation rules for Labels
+
+	for idx, item := range m.GetPoints() {
+		_, _ = idx, item
+
+		if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return MetricSeriesValidationError{
+					field:  fmt.Sprintf("Points[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
+
+	// no validation rules for Unit
 
 	return nil
 }
 
-// CollectResponseMultiError is an error wrapping multiple validation errors
-// returned by CollectResponse.ValidateAll() if the designated constraints
-// aren't met.
-type CollectResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m CollectResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m CollectResponseMultiError) AllErrors() []error { return m }
-
-// CollectResponseValidationError is the validation error returned by
-// CollectResponse.Validate if the designated constraints aren't met.
-type CollectResponseValidationError struct {
+// MetricSeriesValidationError is the validation error returned by
+// MetricSeries.Validate if the designated constraints aren't met.
+type MetricSeriesValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -303,22 +872,22 @@ type CollectResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e CollectResponseValidationError) Field() string { return e.field }
+func (e MetricSeriesValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e CollectResponseValidationError) Reason() string { return e.reason }
+func (e MetricSeriesValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e CollectResponseValidationError) Cause() error { return e.cause }
+func (e MetricSeriesValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e CollectResponseValidationError) Key() bool { return e.key }
+func (e MetricSeriesValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e CollectResponseValidationError) ErrorName() string { return "CollectResponseValidationError" }
+func (e MetricSeriesValidationError) ErrorName() string { return "MetricSeriesValidationError" }
 
 // Error satisfies the builtin error interface
-func (e CollectResponseValidationError) Error() string {
+func (e MetricSeriesValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -330,14 +899,14 @@ func (e CollectResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sCollectResponse.%s: %s%s",
+		"invalid %sMetricSeries.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = CollectResponseValidationError{}
+var _ error = MetricSeriesValidationError{}
 
 var _ interface {
 	Field() string
@@ -345,57 +914,25 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = CollectResponseValidationError{}
+} = MetricSeriesValidationError{}
 
-// Validate checks the field values on MetricsResponse with the rules defined
-// in the proto definition for this message. If any rules are violated, the
-// first error encountered is returned, or nil if there are no violations.
-func (m *MetricsResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on MetricsResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// MetricsResponseMultiError, or nil if none found.
-func (m *MetricsResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *MetricsResponse) validate(all bool) error {
+// Validate checks the field values on DataPoint with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *DataPoint) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	var errors []error
+	// no validation rules for Timestamp
 
-	if len(errors) > 0 {
-		return MetricsResponseMultiError(errors)
-	}
+	// no validation rules for Value
 
 	return nil
 }
 
-// MetricsResponseMultiError is an error wrapping multiple validation errors
-// returned by MetricsResponse.ValidateAll() if the designated constraints
-// aren't met.
-type MetricsResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m MetricsResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m MetricsResponseMultiError) AllErrors() []error { return m }
-
-// MetricsResponseValidationError is the validation error returned by
-// MetricsResponse.Validate if the designated constraints aren't met.
-type MetricsResponseValidationError struct {
+// DataPointValidationError is the validation error returned by
+// DataPoint.Validate if the designated constraints aren't met.
+type DataPointValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -403,22 +940,22 @@ type MetricsResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e MetricsResponseValidationError) Field() string { return e.field }
+func (e DataPointValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e MetricsResponseValidationError) Reason() string { return e.reason }
+func (e DataPointValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e MetricsResponseValidationError) Cause() error { return e.cause }
+func (e DataPointValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e MetricsResponseValidationError) Key() bool { return e.key }
+func (e DataPointValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e MetricsResponseValidationError) ErrorName() string { return "MetricsResponseValidationError" }
+func (e DataPointValidationError) ErrorName() string { return "DataPointValidationError" }
 
 // Error satisfies the builtin error interface
-func (e MetricsResponseValidationError) Error() string {
+func (e DataPointValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -430,14 +967,14 @@ func (e MetricsResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sMetricsResponse.%s: %s%s",
+		"invalid %sDataPoint.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = MetricsResponseValidationError{}
+var _ error = DataPointValidationError{}
 
 var _ interface {
 	Field() string
@@ -445,208 +982,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = MetricsResponseValidationError{}
-
-// Validate checks the field values on AggregationRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *AggregationRequest) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on AggregationRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// AggregationRequestMultiError, or nil if none found.
-func (m *AggregationRequest) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *AggregationRequest) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return AggregationRequestMultiError(errors)
-	}
-
-	return nil
-}
-
-// AggregationRequestMultiError is an error wrapping multiple validation errors
-// returned by AggregationRequest.ValidateAll() if the designated constraints
-// aren't met.
-type AggregationRequestMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m AggregationRequestMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m AggregationRequestMultiError) AllErrors() []error { return m }
-
-// AggregationRequestValidationError is the validation error returned by
-// AggregationRequest.Validate if the designated constraints aren't met.
-type AggregationRequestValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e AggregationRequestValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e AggregationRequestValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e AggregationRequestValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e AggregationRequestValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e AggregationRequestValidationError) ErrorName() string {
-	return "AggregationRequestValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e AggregationRequestValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sAggregationRequest.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = AggregationRequestValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = AggregationRequestValidationError{}
-
-// Validate checks the field values on AggregationResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *AggregationResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on AggregationResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// AggregationResponseMultiError, or nil if none found.
-func (m *AggregationResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *AggregationResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if len(errors) > 0 {
-		return AggregationResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// AggregationResponseMultiError is an error wrapping multiple validation
-// errors returned by AggregationResponse.ValidateAll() if the designated
-// constraints aren't met.
-type AggregationResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m AggregationResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m AggregationResponseMultiError) AllErrors() []error { return m }
-
-// AggregationResponseValidationError is the validation error returned by
-// AggregationResponse.Validate if the designated constraints aren't met.
-type AggregationResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e AggregationResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e AggregationResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e AggregationResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e AggregationResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e AggregationResponseValidationError) ErrorName() string {
-	return "AggregationResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e AggregationResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sAggregationResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = AggregationResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = AggregationResponseValidationError{}
+} = DataPointValidationError{}

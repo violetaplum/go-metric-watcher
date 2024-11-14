@@ -25,89 +25,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/metrics": {
-      "get": {
-        "operationId": "MetricsService_GetMetrics",
-        "responses": {
-          "200": {
-            "description": "A successful response.(streaming responses)",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "result": {
-                  "$ref": "#/definitions/v1MetricsResponse"
-                },
-                "error": {
-                  "$ref": "#/definitions/rpcStatus"
-                }
-              },
-              "title": "Stream result of v1MetricsResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "metricName",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "fromTimestamp",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "toTimestamp",
-            "in": "query",
-            "required": false,
-            "type": "string",
-            "format": "int64"
-          }
-        ],
-        "tags": [
-          "MetricsService"
-        ]
-      }
-    },
-    "/v1/metrics/aggregated": {
-      "get": {
-        "operationId": "MetricsService_GetAggregatedMetrics",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/v1AggregationResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "tags": [
-          "MetricsService"
-        ]
-      }
-    },
-    "/v1/metrics/collect": {
+    "/api/v1/metrics/alert/configure": {
       "post": {
-        "operationId": "MetricsService_CollectMetrics",
+        "operationId": "MetricsService_ConfigureAlert",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1CollectResponse"
+              "$ref": "#/definitions/v1ConfigureAlertResponse"
             }
           },
           "default": {
@@ -120,12 +45,177 @@
         "parameters": [
           {
             "name": "body",
-            "description": " (streaming inputs)",
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1Metric"
+              "$ref": "#/definitions/v1ConfigureAlertRequest"
             }
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
+    },
+    "/api/v1/metrics/dasboard": {
+      "get": {
+        "operationId": "MetricsService_GetDashboardMetrics",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetDashboardMetricsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "metricTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "interval",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "aggregation",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "AGGREGATION_UNSPECIFIED",
+              "AVG",
+              "SUM",
+              "MIN",
+              "MAX",
+              "COUNT"
+            ],
+            "default": "AGGREGATION_UNSPECIFIED"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
+    },
+    "/api/v1/metrics/history": {
+      "get": {
+        "operationId": "MetricsService_GetMetricHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MetricHistoryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "metricType",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "serverId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "startTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "endTime",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "MetricsService"
+        ]
+      }
+    },
+    "/api/v1/metrics/stream": {
+      "get": {
+        "operationId": "MetricsService_StreamMetrics",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1StreamMetricsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "serverId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "metricTypes",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "multi"
+          },
+          {
+            "name": "intervalSeconds",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -138,11 +228,14 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "@type": {
+        "typeUrl": {
           "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
         }
-      },
-      "additionalProperties": {}
+      }
     },
     "rpcStatus": {
       "type": "object",
@@ -157,22 +250,186 @@
         "details": {
           "type": "array",
           "items": {
-            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
       }
     },
-    "v1AggregationResponse": {
-      "type": "object"
+    "v1AggregationType": {
+      "type": "string",
+      "enum": [
+        "AGGREGATION_UNSPECIFIED",
+        "AVG",
+        "SUM",
+        "MIN",
+        "MAX",
+        "COUNT"
+      ],
+      "default": "AGGREGATION_UNSPECIFIED"
     },
-    "v1CollectResponse": {
-      "type": "object"
-    },
-    "v1Metric": {
+    "v1AlertRule": {
       "type": "object",
       "properties": {
-        "name": {
+        "metricType": {
+          "type": "string"
+        },
+        "threshold": {
+          "type": "number",
+          "format": "double"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "severity": {
+          "type": "string"
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1ConfigureAlertRequest": {
+      "type": "object",
+      "properties": {
+        "alertRule": {
+          "$ref": "#/definitions/v1AlertRule"
+        },
+        "ruleId": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1ConfigureAlertResponse": {
+      "type": "object",
+      "properties": {
+        "ruleId": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        },
+        "configuredRule": {
+          "$ref": "#/definitions/v1AlertRule"
+        }
+      }
+    },
+    "v1DataPoint": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "v1GetDashboardMetricsResponse": {
+      "type": "object",
+      "properties": {
+        "series": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1MetricSeries"
+          }
+        },
+        "meta": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "v1MetricHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SystemMetric"
+          }
+        },
+        "metricType": {
+          "type": "string"
+        },
+        "totalCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1MetricSeries": {
+      "type": "object",
+      "properties": {
+        "metricType": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1DataPoint"
+          }
+        },
+        "unit": {
+          "$ref": "#/definitions/v1MetricUnit"
+        }
+      }
+    },
+    "v1MetricUnit": {
+      "type": "string",
+      "enum": [
+        "UNIT_UNSPECIFIED",
+        "PERCENTAGE",
+        "BYTES",
+        "SECONDS",
+        "UNIT_COUNT",
+        "BYTES_PER_SECOND"
+      ],
+      "default": "UNIT_UNSPECIFIED"
+    },
+    "v1StreamMetricsResponse": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1SystemMetric"
+          }
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "v1SystemMetric": {
+      "type": "object",
+      "properties": {
+        "type": {
           "type": "string"
         },
         "value": {
@@ -185,14 +442,17 @@
             "type": "string"
           }
         },
+        "serverId": {
+          "type": "string"
+        },
         "timestamp": {
           "type": "string",
           "format": "int64"
+        },
+        "unit": {
+          "$ref": "#/definitions/v1MetricUnit"
         }
       }
-    },
-    "v1MetricsResponse": {
-      "type": "object"
     }
   }
 }
