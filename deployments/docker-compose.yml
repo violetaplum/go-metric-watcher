@@ -10,8 +10,9 @@ services:
     depends_on:
       - timescaledb
       - prometheus
-      - prometheus-adapter
       - grafana
+    networks:
+      - monitoring
 
   metrics-collector:
     build:
@@ -21,17 +22,18 @@ services:
     depends_on:
       - timescaledb
       - prometheus
-      - prometheus-adapter
       - grafana
+    networks:
+      - monitoring
 
   timescaledb:
-    image: timescale/timescaledb:2.8.1-pg14
+    image: timescale/timescaledb:latest-pg14
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-#      - POSTGRES_DB=metrics_db
+      #      - POSTGRES_DB=metrics_db
       - TIMESCALEDB_PRELOAD_SHARED_LIBRARIES=timescaledb
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
@@ -51,33 +53,37 @@ services:
       - "9090:9090"
     volumes:
       - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus # 데이터 지속성을 위해 볼륨 추가
     networks:
       - monitoring
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
     depends_on:
       - timescaledb
 
-  prometheus-adapter:
-    image: timescale/timescale-prometheus:0.1.0-beta.4
-    ports:
-      - "9201:9201"
-    environment:
-      - TS_PROM_DB_CONNECT_RETRIES=10
-      - TS_PROM_DB_HOST=timescaledb
-      - TS_PROM_DB_PORT=5432
-      - TS_PROM_DB_USER=postgres
-      - TS_PROM_DB_PASSWORD=password
-      - TS_PROM_DB_NAME=metrics_db
-      - TS_PROM_DB_SSL_MODE=disable
-      - TS_PROM_DB="postgres://postgres:password@timescaledb:5432/metrics_db?sslmode=disable"
-    networks:
-      - monitoring
-    depends_on:
-      timescaledb:
-        condition: service_healthy
-      prometheus:
-        condition: service_started
+  #  prometheus-adapter:
+  #    image: timescale/timescale-prometheus:0.1.0-beta.4
+  #    ports:
+  #      - "9201:9201"
+  #    environment:
+  #      - TS_PROM_DB_CONNECT_RETRIES=10
+  #      - TS_PROM_DB_HOST=timescaledb
+  #      - TS_PROM_DB_PORT=5432
+  #      - TS_PROM_DB_USER=postgres
+  #      - TS_PROM_DB_PASSWORD=password
+  #      - TS_PROM_DB_NAME=metrics_db
+  #      - TS_PROM_DB_SSL_MODE=disable
+  #      - TS_PROM_DB="postgres://postgres:password@timescaledb:5432/metrics_db?sslmode=disable"
+  #    networks:
+  #      - monitoring
+  #    depends_on:
+  #      timescaledb:
+  #        condition: service_healthy
+  #      prometheus:
+  #        condition: service_started
 
   grafana:
     image: grafana/grafana:latest
@@ -93,7 +99,8 @@ services:
     depends_on:
       - timescaledb
       - prometheus
-      - prometheus-adapter
+    networks:
+      - monitoring
 
 # 네트워크 정의
 networks:
@@ -104,4 +111,5 @@ networks:
 volumes:
   timescaledb_data: # TimescaleDB용 볼륨
   grafana_data:     # Grafana용 볼륨
+  prometheus_data:  # Prometheus 데이터를 위한 볼륨
 
