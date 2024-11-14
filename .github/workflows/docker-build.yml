@@ -27,8 +27,8 @@ jobs:
       - name: Build and push metrics-api
         uses: docker/build-push-action@v4
         with:
-          context: ..
-          file: deployments/Dockerfile
+          context: .
+          file: ./deployments/Dockerfile
           target: metrics-api
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/metrics-api:${{ github.sha }}
@@ -36,8 +36,8 @@ jobs:
       - name: Build and push metrics-collector
         uses: docker/build-push-action@v4
         with:
-          context: ..
-          file: deployments/Dockerfile
+          context: .
+          file: ./deployments/Dockerfile
           target: metrics-collector
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/metrics-collector:${{ github.sha }}
