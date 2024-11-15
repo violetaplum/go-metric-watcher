@@ -39,22 +39,36 @@
 ```
 
 
-### 설치
-
-1. 레포지토리 클론
+### 설치 방법
 
 ```bash
+# 저장소 클론
 git clone https://github.com/violetaplum/go-metric-watcher
+
+# 의존성 설치
+go mod download
+
+# 빌드
+go build -o cmd/api/main.go
+go build -o cmd/collector/main.go
+
 ```
 
-2. 실행
+### 실행 방법
+
+
 ```bash
+# 인프라 환경 구성
 make build
-```
 
-### 테스트
+# 직접실행
+go build -o api cmd/api/main.go
+go build -o collector cmd/collector/main.go
 
-```bash
+./api
+./collector
+
+# go test 코드 실행
 go test ./...
 ```
 

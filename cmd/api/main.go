@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go-metric-watcher/internal/model"
+	"github.com/violetaplum/go-metric-watcher/internal/model"
 	"log"
 	"net/http"
 	"time"
@@ -27,7 +27,7 @@ func main() {
 	metrics := v1.Group("/metrics")
 
 	metrics.GET("", func(c *gin.Context) {
-		metrics := []model.MetricResponse{
+		metrics := []model.SystemMetric{
 			{
 				Value:     123.45,
 				Timestamp: time.Now(),
@@ -39,7 +39,7 @@ func main() {
 
 	metrics.GET("/:name", func(c *gin.Context) {
 		name := c.Param("name")
-		metric := model.MetricResponse{
+		metric := model.SystemMetric{
 			Value:     123.45,
 			Timestamp: time.Now(),
 		}
