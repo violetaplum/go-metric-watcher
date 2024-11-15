@@ -45,7 +45,6 @@
 
 ```bash
 git clone https://github.com/violetaplum/go-metric-watcher
-cd metricat
 ```
 
 2. 실행
