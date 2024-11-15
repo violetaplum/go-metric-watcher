@@ -1,20 +1,42 @@
 package monitoring
 
 import (
+	"fmt"
 	"github.com/shirou/gopsutil/cpu"
 	"time"
 )
 
-type CPUCollector struct{}
-
-func NewCPUCollector() *CPUCollector {
-	return &CPUCollector{}
+type CPUMetrics struct {
+	Usage float64
+	Cores int
 }
 
-func (c *CPUCollector) Connect() (float64, error) {
-	percentages, err := cpu.Percent(time.Second, false)
+type CPUMonitor struct {
+	lastMeasurement time.Time
+}
+
+func NewCPUMonitor() *CPUMonitor {
+	return &CPUMonitor{}
+}
+
+func (m *CPUMonitor) Collect() (*CPUMetrics, error) {
+	percentage, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		return 0, err
+		return nil, fmt.Errorf("failed to get CPU percentage: %w", err)
 	}
-	return percentages[0], err
+
+	cores, err := cpu.Counts(true)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get CPU cores: %w", err)
+	}
+
+	m.lastMeasurement = time.Now()
+	return &CPUMetrics{
+		Usage: percentage[0],
+		Cores: cores,
+	}, nil
+}
+
+func (m *CPUMonitor) LastMeasurement() time.Time {
+	return m.lastMeasurement
 }

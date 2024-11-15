@@ -8,13 +8,13 @@ datasources:
     isDefault: true
 
 
-  - name: TimescaleDB
-    type: postgres
-    url: timescaledb:5432
-    database: metrics
-    user: postgres
-    secureJsonData:
-      password: password
-    jsonData:
-      sslmode: disable
-      postgresVersion: 1400
+#  - name: TimescaleDB
+#    type: postgres
+#    url: timescaledb:5432
+#    database: metrics
+#    user: postgres
+#    secureJsonData:
+#      password: password
+#    jsonData:
+#      sslmode: disable
+#      postgresVersion: 1400
