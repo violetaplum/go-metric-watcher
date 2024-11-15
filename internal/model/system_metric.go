@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	//pb "github.com/violetaplum/go-metric-watcher"
+	"time"
+)
 
 type MetricResponse struct {
 	// float32: 32비트 (4바이트)
@@ -16,6 +19,10 @@ type MetricResponse struct {
 	// 더 넓은 범위의 값 표현 가능
 	// Go에서 기본 실수형이 float64
 	// 메모리 사용량 차이가 크지 않음
-	Value     float64   `json:"value"`
-	Timestamp time.Time `json:"timestamp"`
+	Type      string
+	Value     float64
+	Labels    map[string]string
+	ServerID  string
+	Timestamp time.Time
+	//Unit      pb.metric
 }
