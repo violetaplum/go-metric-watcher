@@ -42,20 +42,15 @@
 ### 설치
 
 1. 레포지토리 클론
+
 ```bash
-git clone https://github.com/yourusername/metricat.git
+git clone https://github.com/violetaplum/go-metric-watcher
 cd metricat
 ```
 
-2. 환경 설정
+2. 실행
 ```bash
-cp .env.example .env
-# .env 파일 수정
-```
-
-3. 실행
-```bash
-docker-compose up -d
+make build
 ```
 
 ### 테스트
@@ -69,7 +64,7 @@ go test ./...
 ```mermaid
 graph TD
     A[Metrics Collector] --> B[gRPC Server]
-    B --> C[TimescaleDB]
+    B --> C[Prometheus]
     C --> D[Grafana]
     B --> E[Alert Manager]
     E --> F[Notification Service]
@@ -80,23 +75,42 @@ graph TD
 ```
 .
 ├── cmd/
-│   ├── collector/
+│   ├── api/
 │   │   └── main.go
-│   └── api/
+│   └── collector/
 │       └── main.go
+├── deployments/
+│   └── grafana/
+│       ├── provisioning/
+│       │   └── init-scripts/
+│       │       └── 01-init.sql
+│       ├── docker-compose.yml
+│       └── Dockerfile
 ├── internal/
-│   ├── service/
+│   ├── model/
+│   │   └── metric.go
 │   ├── repository/
-│   └── model/
+│   │   └── timescaledb.go
+│   └── service/
+│       ├── collector.go
+│       └── metrics.go
 ├── pkg/
+│   ├── grpcutil/
+│   │   └── server.go
 │   ├── logger/
+│   │   └── logger.go
 │   ├── monitoring/
+│   │   ├── cpu.go
+│   │   ├── disk.go
+│   │   └── memory.go
 │   └── notifier/
-└── docker-compose.yml
+│       ├── email.go
+│       └── slack.go
+└── prometheus/
+    └── prometheus.yml
 ```
 
 ## 📌 API 문서
-
 ### Metrics API
 - `CollectMetrics`: 시스템 메트릭 수집
 - `StreamMetrics`: 실시간 메트릭 스트리밍
@@ -104,16 +118,9 @@ graph TD
 
 ### Alert API
 - `ConfigureAlert`: 알림 규칙 설정
-- `GetAlertHistory`: 알림 이력 조회
 
 ## 🔧 설정
 
-### 환경변수
-```bash
-COLLECT_INTERVAL=10s     # 메트릭 수집 주기
-SERVER_ID=server1       # 서버 식별자
-DB_CONNECTION=...       # DB 연결 정보
-```
 
 ### 알림 설정
 ```yaml
