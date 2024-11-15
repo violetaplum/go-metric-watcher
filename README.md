@@ -23,7 +23,7 @@
 
 - **Language:** Go
 - **Framework:** gRPC
-- **Database:** TimescaleDB
+- **Database:** Prometheus
 - **Visualization:** Grafana
 - **Monitoring:** Custom Metrics Collector
 - **Infrastructure:** Docker, Docker Compose
