@@ -33,7 +33,7 @@
 ### 사전 요구사항
 
 ```bash
-- Go 1.21 이상
+- Go 1.23 이상
 - Docker
 - Docker Compose
 ```
