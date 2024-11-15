@@ -1,11 +1,11 @@
 package model
 
 import (
-	//pb "github.com/violetaplum/go-metric-watcher"
+	watcherPb "github.com/violetaplum/go-metric-watcher/proto/gen/go/metrics/v1"
 	"time"
 )
 
-type MetricResponse struct {
+type SystemMetric struct {
 	// float32: 32비트 (4바이트)
 	// - 정밀도: 약 7자리
 	// - 범위: ±1.18E-38 ~ ±3.4E38
@@ -24,5 +24,16 @@ type MetricResponse struct {
 	Labels    map[string]string
 	ServerID  string
 	Timestamp time.Time
-	//Unit      pb.metric
+	Unit      watcherPb.MetricUnit
+}
+
+func (m *SystemMetric) ToProto() *watcherPb.SystemMetric {
+	return &watcherPb.SystemMetric{
+		Type:      m.Type,
+		Value:     m.Value,
+		Labels:    m.Labels,
+		ServerId:  m.ServerID,
+		Timestamp: m.Timestamp.Unix(),
+		Unit:      m.Unit,
+	}
 }
