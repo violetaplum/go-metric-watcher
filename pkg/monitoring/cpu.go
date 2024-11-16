@@ -31,12 +31,18 @@ func (m *CPUMonitor) Collect() (*CPUMetrics, error) {
 	}
 
 	m.lastMeasurement = time.Now()
-	return &CPUMetrics{
-		Usage: percentage[0],
-		Cores: cores,
-	}, nil
+	return NewCPUMetrics(percentage, cores), nil
 }
 
 func (m *CPUMonitor) LastMeasurement() time.Time {
 	return m.lastMeasurement
+}
+
+// todo: 이게 맞는건가? 불필요하지않나
+func NewCPUMetrics(percentage []float64, cores int) *CPUMetrics {
+	metric := &CPUMetrics{
+		Usage: percentage[0],
+		Cores: cores,
+	}
+	return metric
 }
