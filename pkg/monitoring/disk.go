@@ -51,8 +51,6 @@ func (d *DiskMonitor) Collect() (*DiskMetric, error) {
 
 	fmt.Println(diskStat, ioStats)
 
-	//todo: 수집 메트릭을 프로메테우스에 저장하는 로직 추가
-
 	return NewDiskMetric(diskStat, ioStats), nil
 }
 

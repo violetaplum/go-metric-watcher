@@ -38,7 +38,6 @@ func (m *CPUMonitor) LastMeasurement() time.Time {
 	return m.lastMeasurement
 }
 
-// todo: 이게 맞는건가? 불필요하지않나
 func NewCPUMetrics(percentage []float64, cores int) *CPUMetrics {
 	metric := &CPUMetrics{
 		Usage: percentage[0],
