@@ -14,7 +14,7 @@ func NewMemoryMonitor() *MemoryMonitor {
 	return &MemoryMonitor{}
 }
 
-type MemoryMetric struct {
+type MemoryMetrics struct {
 	// 기본 메모리 정보
 	Total       uint64  `json:"total"`        // 전체 메모리 용량 (bytes)
 	Available   uint64  `json:"available"`    // 사용 가능한 메모리 (bytes)
@@ -30,8 +30,8 @@ type MemoryMetric struct {
 	BufferSize uint64 `json:"buffer_size"` // 버퍼 크기
 }
 
-func NewMemoryMetric(vmStat *mem.VirtualMemoryStat) *MemoryMetric {
-	return &MemoryMetric{
+func NewMemoryMetric(vmStat *mem.VirtualMemoryStat) *MemoryMetrics {
+	return &MemoryMetrics{
 		Total:       vmStat.Total,
 		Available:   vmStat.Available,
 		Used:        vmStat.Used,
@@ -45,7 +45,7 @@ func NewMemoryMetric(vmStat *mem.VirtualMemoryStat) *MemoryMetric {
 	}
 }
 
-func (m *MemoryMonitor) Collect() (*MemoryMetric, error) {
+func (m *MemoryMonitor) Collect() (*MemoryMetrics, error) {
 	vmStat, err := mem.VirtualMemory()
 	if err != nil {
 		return nil, fmt.Errorf("failed to collect memory metris: %w", err)

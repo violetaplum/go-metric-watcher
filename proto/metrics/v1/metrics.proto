@@ -51,12 +51,21 @@ service MetricsService {
 
 
 message SystemMetric {
-  string type = 1;                    // cpu, memory, disk 등
-  double value = 2;
-  map<string, string> labels = 3;     // 메트릭 레이블
-  string server_id = 4;
-  int64 timestamp = 5;
-  MetricUnit unit = 6;                // 단위
+  // 메트릭이 수집된 시간
+  google.protobuf.Timestamp timestamp = 1;
+
+  // CPU 관련
+  double cpu_usage = 2;    // CPU 사용률 (%)
+
+  // 메모리 관련
+  double memory_usage = 3; // 메모리 사용률 (%)
+  uint64 memory_total = 4; // 전체 메모리 크기 (bytes)
+  uint64 memory_free = 5;  // 사용 가능한 메모리 (bytes)
+
+  // 디스크 관련
+  double disk_usage = 6;   // 디스크 사용률 (%)
+  uint64 disk_total = 7;   // 전체 디스크 크기 (bytes)
+  uint64 disk_free = 8;    // 사용 가능한 디스크 공간 (bytes)
 }
 
 enum MetricUnit {

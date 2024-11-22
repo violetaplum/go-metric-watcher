@@ -2,38 +2,36 @@ package model
 
 import (
 	watcherPb "github.com/violetaplum/go-metric-watcher/proto/gen/go/metrics/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
 type SystemMetric struct {
-	// float32: 32비트 (4바이트)
-	// - 정밀도: 약 7자리
-	// - 범위: ±1.18E-38 ~ ±3.4E38
+	Timestamp time.Time // 메트릭이 수집된 시간
 
-	// float64: 64비트 (8바이트)
-	// - 정밀도: 약 15자리
-	// - 범위: ±2.23E-308 ~ ±1.80E308
-	// float64를 선호하는 이유:
-	//
-	// 더 높은 정밀도 필요
-	// 더 넓은 범위의 값 표현 가능
-	// Go에서 기본 실수형이 float64
-	// 메모리 사용량 차이가 크지 않음
-	Type      string
-	Value     float64
-	Labels    map[string]string
-	ServerID  string
-	Timestamp time.Time
-	Unit      watcherPb.MetricUnit
+	// CPU 관련
+	CPUUsage float64 // CPU 사용률 (%)
+
+	// 메모리 관련
+	MemoryUsage float64 // 메모리 사용률 (%)
+	MemoryTotal uint64  // 전체 메모리 크기 (bytes)
+	MemoryFree  uint64  // 사용 가능한 메모리 (bytes)
+
+	// 디스크 관련
+	DiskUsage float64 // 디스크 사용률 (%)
+	DiskTotal uint64  // 전체 디스크 크기 (bytes)
+	DiskFree  uint64  // 사용 가능한 디스크 공간 (bytes)
 }
 
 func (m *SystemMetric) ToProto() *watcherPb.SystemMetric {
 	return &watcherPb.SystemMetric{
-		Type:      m.Type,
-		Value:     m.Value,
-		Labels:    m.Labels,
-		ServerId:  m.ServerID,
-		Timestamp: m.Timestamp.Unix(),
-		Unit:      m.Unit,
+		Timestamp:   timestamppb.New(m.Timestamp),
+		CpuUsage:    m.CPUUsage,
+		MemoryUsage: m.MemoryUsage,
+		MemoryTotal: m.MemoryTotal,
+		MemoryFree:  m.MemoryFree,
+		DiskUsage:   m.DiskUsage,
+		DiskTotal:   m.DiskTotal,
+		DiskFree:    m.DiskFree,
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type DiskMetric struct {
+type DiskMetrics struct {
 	// 디스크 사용량 관련 메트릭
 	Path        string  `json:"path"`
 	Total       uint64  `json:"total"`        // 전체 디스크 용량 (bytes)
@@ -36,7 +36,7 @@ func NewDiskMonitor(path string) *DiskMonitor {
 	}
 }
 
-func (d *DiskMonitor) Collect() (*DiskMetric, error) {
+func (d *DiskMonitor) Collect() (*DiskMetrics, error) {
 	diskStat, err := disk.Usage(d.path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to collect disk metrics for %s: %w", d.path, err)
@@ -54,8 +54,8 @@ func (d *DiskMonitor) Collect() (*DiskMetric, error) {
 	return NewDiskMetric(diskStat, ioStats), nil
 }
 
-func NewDiskMetric(diskStat *disk.UsageStat, ioStats map[string]disk.IOCountersStat) *DiskMetric {
-	metric := &DiskMetric{
+func NewDiskMetric(diskStat *disk.UsageStat, ioStats map[string]disk.IOCountersStat) *DiskMetrics {
+	metric := &DiskMetrics{
 		Path:        diskStat.Path,
 		Total:       diskStat.Total,
 		Used:        diskStat.Free,

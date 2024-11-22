@@ -106,6 +106,13 @@
             "type": "string"
           },
           {
+            "name": "labels",
+            "description": "This is a request variable of the map type. The query format is \"map_name[key]=value\", e.g. If the map name is Age, the key type is string, and the value type is integer, the query parameter is expressed as Age[\"bob\"]=18",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "aggregation",
             "in": "query",
             "required": false,
@@ -169,6 +176,13 @@
             "required": false,
             "type": "string",
             "format": "int64"
+          },
+          {
+            "name": "labels",
+            "description": "This is a request variable of the map type. The query format is \"map_name[key]=value\", e.g. If the map name is Age, the key type is string, and the value type is integer, the query parameter is expressed as Age[\"bob\"]=18",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "tags": [
@@ -228,14 +242,11 @@
     "protobufAny": {
       "type": "object",
       "properties": {
-        "typeUrl": {
+        "@type": {
           "type": "string"
-        },
-        "value": {
-          "type": "string",
-          "format": "byte"
         }
-      }
+      },
+      "additionalProperties": {}
     },
     "rpcStatus": {
       "type": "object",
@@ -250,6 +261,7 @@
         "details": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
         }
@@ -348,6 +360,7 @@
         "series": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1MetricSeries"
           }
         },
@@ -365,6 +378,7 @@
         "metrics": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1SystemMetric"
           }
         },
@@ -392,6 +406,7 @@
         "points": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1DataPoint"
           }
         },
@@ -410,7 +425,8 @@
         "UNIT_COUNT",
         "BYTES_PER_SECOND"
       ],
-      "default": "UNIT_UNSPECIFIED"
+      "default": "UNIT_UNSPECIFIED",
+      "title": "- UNIT_COUNT: COUNT -\u003e UNIT_COUNT로 변경"
     },
     "v1StreamMetricsResponse": {
       "type": "object",
@@ -418,6 +434,7 @@
         "metrics": {
           "type": "array",
           "items": {
+            "type": "object",
             "$ref": "#/definitions/v1SystemMetric"
           }
         },
@@ -429,28 +446,48 @@
     "v1SystemMetric": {
       "type": "object",
       "properties": {
-        "type": {
-          "type": "string"
-        },
-        "value": {
-          "type": "number",
-          "format": "double"
-        },
-        "labels": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "serverId": {
-          "type": "string"
-        },
         "timestamp": {
           "type": "string",
-          "format": "int64"
+          "format": "date-time",
+          "title": "메트릭이 수집된 시간"
         },
-        "unit": {
-          "$ref": "#/definitions/v1MetricUnit"
+        "cpuUsage": {
+          "type": "number",
+          "format": "double",
+          "description": "CPU 사용률 (%)",
+          "title": "CPU 관련"
+        },
+        "memoryUsage": {
+          "type": "number",
+          "format": "double",
+          "description": "메모리 사용률 (%)",
+          "title": "메모리 관련"
+        },
+        "memoryTotal": {
+          "type": "string",
+          "format": "uint64",
+          "title": "전체 메모리 크기 (bytes)"
+        },
+        "memoryFree": {
+          "type": "string",
+          "format": "uint64",
+          "title": "사용 가능한 메모리 (bytes)"
+        },
+        "diskUsage": {
+          "type": "number",
+          "format": "double",
+          "description": "디스크 사용률 (%)",
+          "title": "디스크 관련"
+        },
+        "diskTotal": {
+          "type": "string",
+          "format": "uint64",
+          "title": "전체 디스크 크기 (bytes)"
+        },
+        "diskFree": {
+          "type": "string",
+          "format": "uint64",
+          "title": "사용 가능한 디스크 공간 (bytes)"
         }
       }
     }
