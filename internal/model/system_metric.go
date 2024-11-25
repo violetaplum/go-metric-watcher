@@ -23,6 +23,12 @@ type SystemMetric struct {
 	DiskFree  uint64  // 사용 가능한 디스크 공간 (bytes)
 }
 
+type SystemMetricAverage struct {
+	CPUUsage    float64
+	MemoryUsage float64
+	DiskUsage   float64
+}
+
 func (m *SystemMetric) ToProto() *watcherPb.SystemMetric {
 	return &watcherPb.SystemMetric{
 		Timestamp:   timestamppb.New(m.Timestamp),

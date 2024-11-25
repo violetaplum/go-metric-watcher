@@ -1,24 +1,34 @@
 package main
 
 import (
-	"fmt"
+	"github.com/violetaplum/go-metric-watcher/internal/service"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 func main() {
-	fmt.Println("this is collector server...")
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
+	// 매트릭 프로세서 생성 (15초 간격으로 수집)
+	processor := service.NewMetricProcessor(15 * time.Second)
 
-	for {
-		select {
-		case <-ticker.C:
-			// 1분마다 실행할 작업들 예시
-			//collectCPUMetrics()
-			//collectMemoryMetrics()
-			//collectDiskMetrics()
-			// ... 기타 메트릭 수집
-			fmt.Println("10초가 지났습니다 메트릭수집을 시작합니다... 현재 시각은 :: ", time.Now())
-		}
-	}
+	// 종료 채널 생성
+	stopCh := make(chan struct{})
+
+	// Prometheus 메트릭 서버 시작 (2112 포트)
+	processor.StartCollect(stopCh)
+	sigCh := make(chan os.Signal, 1)
+
+	// 종료 시그널 처리
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	log.Printf("Metric collector started. Prometheus endpoint: http://localhost:2112/metrics")
+
+	// 종료 시그널 대기
+	<-sigCh
+	log.Println("Shutting down collector...")
+
+	// 종료 처리
+	close(stopCh)
+
 }

@@ -2,8 +2,12 @@ package service
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
+	"github.com/violetaplum/go-metric-watcher/internal/repository"
 	"github.com/violetaplum/go-metric-watcher/pkg/monitoring"
+	"log"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -15,6 +19,7 @@ type MetricProcessor struct {
 	diskMonitor    *monitoring.DiskMonitor
 	metrics        []model.SystemMetric
 	collectionTime time.Duration
+	promDB         *repository.PrometheusDB
 }
 
 func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
@@ -23,11 +28,23 @@ func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
 		memoryMonitor:  monitoring.NewMemoryMonitor(),
 		diskMonitor:    monitoring.NewDiskMonitor("/"),
 		collectionTime: collectionTime,
+		promDB:         repository.NewPrometheusDB(),
 	}
 }
 
 // 메트릭 수집 시작
 func (mp *MetricProcessor) StartCollect(stopCh <-chan struct{}) {
+	// Prometheus HTTP 핸들러 등록
+	http.Handle("/go-metric-watcher", promhttp.Handler())
+
+	// Prometheus 메트릭 서버 시작
+	go func() {
+		if err := http.ListenAndServe(":2112", nil); err != nil {
+			log.Printf("Prometheus metrics server failed: %v ", err)
+
+		}
+	}()
+
 	ticker := time.NewTicker(mp.collectionTime)
 	defer ticker.Stop()
 
@@ -37,7 +54,8 @@ func (mp *MetricProcessor) StartCollect(stopCh <-chan struct{}) {
 			return
 		case <-ticker.C:
 			if err := mp.collect(); err != nil {
-				//todo: 에러 로깅
+				log.Printf("Error collecting metrics: %v", err)
+
 				continue
 			}
 
@@ -51,17 +69,22 @@ func (mp *MetricProcessor) collect() error {
 		return err
 	}
 
+	mp.promDB.SaveCPUMetrics(cpuMetrics)
+
 	memoryMetrics, err := mp.memoryMonitor.Collect()
 	if err != nil {
 		return err
 	}
+
+	mp.promDB.SaveMemoryMetrics(memoryMetrics)
 
 	diskMetrics, err := mp.diskMonitor.Collect()
 	if err != nil {
 		return err
 	}
 
-	mp.mu.Lock()
+	mp.promDB.SaveDiskMetrics(diskMetrics)
+
 	mp.metrics = append(mp.metrics, model.SystemMetric{
 		Timestamp:   time.Now(),
 		CPUUsage:    cpuMetrics.Usage,
@@ -72,9 +95,6 @@ func (mp *MetricProcessor) collect() error {
 		DiskTotal:   diskMetrics.Total,
 		DiskFree:    diskMetrics.Free,
 	})
-	mp.mu.Unlock()
-
-	mp.cleanOldMetrics()
 
 	return nil
 }
@@ -105,19 +125,19 @@ func (mp *MetricProcessor) GetMetricsByTimeRange(start, end time.Time) []model.S
 }
 
 // 오래된 메트릭 정리 (24시간 이전 데이터)
-func (mp *MetricProcessor) cleanOldMetrics() {
-	mp.mu.Lock()
-	defer mp.mu.Unlock()
-	cutoff := time.Now().Add(-24 * time.Hour)
-	var newMetrics []model.SystemMetric
-
-	for _, metric := range mp.metrics {
-		if metric.Timestamp.After(cutoff) {
-			newMetrics = append(newMetrics, metric)
-		}
-	}
-	mp.metrics = newMetrics
-}
+//func (mp *MetricProcessor) cleanOldMetrics() {
+//	mp.mu.Lock()
+//	defer mp.mu.Unlock()
+//	cutoff := time.Now().Add(-24 * time.Hour)
+//	var newMetrics []model.SystemMetric
+//
+//	for _, metric := range mp.metrics {
+//		if metric.Timestamp.After(cutoff) {
+//			newMetrics = append(newMetrics, metric)
+//		}
+//	}
+//	mp.metrics = newMetrics
+//}
 
 // 평균 시간 계산
 func (mp *MetricProcessor) GetAverages() model.SystemMetricAverage {

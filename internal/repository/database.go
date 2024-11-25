@@ -185,7 +185,7 @@ func (p *PrometheusDB) SaveCPUMetrics(metrics *monitoring.CPUMetrics) {
 	p.cpuCores.Set(float64(metrics.Cores))
 }
 
-func (p *PrometheusDB) SaveMemoryMetrics(metrics *monitoring.MemoryMetrics) {
+func (p *PrometheusDB) SaveMemoryMetrics(metrics *monitoring.MemoryMetric) {
 	p.memoryTotal.Set(float64(metrics.Total))
 	p.memoryAvailable.Set(float64(metrics.Available))
 	p.memoryUsed.Set(float64(metrics.Used))
