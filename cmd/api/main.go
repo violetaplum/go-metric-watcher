@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
+	"github.com/violetaplum/go-metric-watcher/pkg/monitoring"
 	"log"
 	"net/http"
 	"time"
@@ -16,7 +17,10 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
+	// API v1 그룹
 	v1 := r.Group("/api/v1")
+
+	// 헬스체크
 	v1.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
@@ -24,29 +28,38 @@ func main() {
 		})
 	})
 
-	metrics := v1.Group("/metrics")
+	cpuMonitoring := monitoring.NewCPUMonitor()
+	memoryMonitoring := monitoring.NewMemoryMonitor()
+	diskMonitoring := monitoring.NewDiskMonitor("/")
 
-	metrics.GET("", func(c *gin.Context) {
+	cpuMetrics, err := cpuMonitoring.Collect()
+	if err != nil {
+		log.Printf("Error on collecting cpu metrics: %v", err)
+	}
+	memoryMetrics, err := memoryMonitoring.Collect()
+	if err != nil {
+		log.Printf("Error on collecting memory metrics: %v", err)
+	}
+	diskMetrics, err := diskMonitoring.Collect()
+	if err != nil {
+		log.Printf("Error on collecting disk metrics: %v", err)
+	}
+
+	v1.GET("/metrics", func(c *gin.Context) {
 		metrics := []model.SystemMetric{
 			{
-				Value:     123.45,
-				Timestamp: time.Now(),
+				Timestamp:   time.Now(),
+				CPUUsage:    cpuMetrics.Usage,
+				MemoryUsage: memoryMetrics.UsedPercent,
+				MemoryTotal: memoryMetrics.Total,
+				MemoryFree:  memoryMetrics.Free,
+				DiskUsage:   diskMetrics.UsedPercent,
+				DiskTotal:   diskMetrics.Total,
+				DiskFree:    diskMetrics.Free,
 			},
 			// 더 많은 메트릭 데이터..
 		}
 		c.JSON(http.StatusOK, metrics)
-	})
-
-	metrics.GET("/:name", func(c *gin.Context) {
-		name := c.Param("name")
-		metric := model.SystemMetric{
-			Value:     123.45,
-			Timestamp: time.Now(),
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"name":   name,
-			"metric": metric,
-		})
 	})
 
 	log.Println("API Server starting on :8080..")
