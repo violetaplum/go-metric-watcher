@@ -24,5 +24,6 @@ FROM alpine:3.18  AS metrics-collector
 WORKDIR /app
 COPY --from=builder /app/metrics-collector /metrics-collector
 
+EXPOSE 2112
 CMD ["/metrics-collector"]
 

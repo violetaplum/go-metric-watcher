@@ -35,7 +35,7 @@ func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
 // 메트릭 수집 시작
 func (mp *MetricProcessor) StartCollect(stopCh <-chan struct{}) {
 	// Prometheus HTTP 핸들러 등록
-	http.Handle("/go-metric-watcher", promhttp.Handler())
+	http.Handle("/metrics", promhttp.Handler())
 
 	// Prometheus 메트릭 서버 시작
 	go func() {
