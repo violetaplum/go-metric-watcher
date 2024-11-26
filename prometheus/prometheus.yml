@@ -4,11 +4,11 @@ global:
 
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: 'go-metric-watcher'
     static_configs:
-      - targets: ['localhost:9090']
-
-  - job_name: 'metrics-api'
-    static_configs:
-      - targets: ['metrics-api:8080']
-    metrics_path: '/api/v1/metrics'
+      - targets: ['localhost:2112']
+#
+#  - job_name: 'metrics-api'
+#    static_configs:
+#      - targets: ['metrics-api:8080']
+#    metrics_path: '/api/v1/metrics'

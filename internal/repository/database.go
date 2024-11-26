@@ -42,7 +42,7 @@ func NewPrometheusDB() *PrometheusDB {
 	return &PrometheusDB{
 		// cpu 메트릭
 		cpuUsage: promauto.NewGauge(prometheus.GaugeOpts{
-			Name: "system_cou_usgae_percent",
+			Name: "system_cpu_usgae_percent",
 			Help: "Current CPU usage in percentage",
 		}),
 		cpuCores: promauto.NewGauge(prometheus.GaugeOpts{
