@@ -52,12 +52,12 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
       - prometheus_data:/prometheus # 데이터 지속성을 위해 볼륨 추가
     networks:
       - monitoring
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yaml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
@@ -87,17 +87,18 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    command: >
+      sh -c "mkdir -p /etc/grafana/provisioning/{dashboards,datasources,plugins,alerting} && /run.sh"
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_USER=adminç
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
-#      - timescaledb
       - prometheus
     networks:
       - monitoring
