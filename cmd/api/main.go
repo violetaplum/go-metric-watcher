@@ -31,6 +31,7 @@ func main() {
 	cpuMonitoring := monitoring.NewCPUMonitor()
 	memoryMonitoring := monitoring.NewMemoryMonitor()
 	diskMonitoring := monitoring.NewDiskMonitor("/")
+	networkMonitoring := monitoring.NewNetworkMonitor()
 
 	cpuMetrics, err := cpuMonitoring.Collect()
 	if err != nil {
@@ -45,19 +46,28 @@ func main() {
 		log.Printf("Error on collecting disk metrics: %v", err)
 	}
 
+	networkMetrics, err := networkMonitoring.Collect()
+	// 모든 인터페이스의 합계를 계산
+	var totalBytesRecv uint64
+	var totalBytesSent uint64
+	for _, metric := range networkMetrics {
+		totalBytesRecv += metric.BytesRecv
+		totalBytesSent += metric.BytesSent
+	}
 	v1.GET("/metrics", func(c *gin.Context) {
 		metrics := []model.SystemMetric{
 			{
-				Timestamp:   time.Now(),
-				CPUUsage:    cpuMetrics.Usage,
-				MemoryUsage: memoryMetrics.UsedPercent,
-				MemoryTotal: memoryMetrics.Total,
-				MemoryFree:  memoryMetrics.Free,
-				DiskUsage:   diskMetrics.UsedPercent,
-				DiskTotal:   diskMetrics.Total,
-				DiskFree:    diskMetrics.Free,
+				Timestamp:        time.Now(),
+				CPUUsage:         cpuMetrics.Usage,
+				MemoryUsage:      memoryMetrics.UsedPercent,
+				MemoryTotal:      memoryMetrics.Total,
+				MemoryFree:       memoryMetrics.Free,
+				DiskUsage:        diskMetrics.UsedPercent,
+				DiskTotal:        diskMetrics.Total,
+				DiskFree:         diskMetrics.Free,
+				NetworkBytesRecv: totalBytesRecv,
+				NetworkBytesSent: totalBytesSent,
 			},
-			// 더 많은 메트릭 데이터..
 		}
 		c.JSON(http.StatusOK, metrics)
 	})

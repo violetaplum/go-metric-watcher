@@ -17,6 +17,7 @@ type MetricProcessor struct {
 	cpuMonitor     *monitoring.CPUMonitor
 	memoryMonitor  *monitoring.MemoryMonitor
 	diskMonitor    *monitoring.DiskMonitor
+	networkMonitor *monitoring.NetworkMonitor
 	metrics        []model.SystemMetric
 	collectionTime time.Duration
 	promDB         *repository.PrometheusDB
@@ -29,6 +30,7 @@ func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
 		diskMonitor:    monitoring.NewDiskMonitor("/"),
 		collectionTime: collectionTime,
 		promDB:         repository.NewPrometheusDB(),
+		networkMonitor: monitoring.NewNetworkMonitor(),
 	}
 }
 
@@ -85,15 +87,32 @@ func (mp *MetricProcessor) collect() error {
 
 	mp.promDB.SaveDiskMetrics(diskMetrics)
 
+	networkMetrics, err := mp.networkMonitor.Collect()
+	if err != nil {
+		return err
+	}
+
+	mp.promDB.SaveNetworkMetrics(networkMetrics)
+
+	// 모든 인터페이스의 송수신 합계 계산
+	var totalBytesRecv uint64
+	var totalBytesSent uint64
+	for _, metric := range networkMetrics {
+		totalBytesRecv += metric.BytesRecv
+		totalBytesSent += metric.BytesSent
+	}
+
 	mp.metrics = append(mp.metrics, model.SystemMetric{
-		Timestamp:   time.Now(),
-		CPUUsage:    cpuMetrics.Usage,
-		MemoryUsage: cpuMetrics.Usage,
-		MemoryTotal: memoryMetrics.Total,
-		MemoryFree:  memoryMetrics.Free,
-		DiskUsage:   diskMetrics.UsedPercent,
-		DiskTotal:   diskMetrics.Total,
-		DiskFree:    diskMetrics.Free,
+		Timestamp:        time.Now(),
+		CPUUsage:         cpuMetrics.Usage,
+		MemoryUsage:      cpuMetrics.Usage,
+		MemoryTotal:      memoryMetrics.Total,
+		MemoryFree:       memoryMetrics.Free,
+		DiskUsage:        diskMetrics.UsedPercent,
+		DiskTotal:        diskMetrics.Total,
+		DiskFree:         diskMetrics.Free,
+		NetworkBytesRecv: totalBytesRecv,
+		NetworkBytesSent: totalBytesSent,
 	})
 
 	return nil

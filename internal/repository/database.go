@@ -36,6 +36,14 @@ type PrometheusDB struct {
 	diskWriteTime   *prometheus.GaugeVec
 	diskIOTime      *prometheus.GaugeVec
 	diskWeightedIO  *prometheus.GaugeVec
+
+	// 네트워크 메트릭
+	networkBytesSent   *prometheus.GaugeVec
+	networkBytesRecv   *prometheus.GaugeVec
+	networkPacketsSent *prometheus.GaugeVec
+	networkPacketsRecv *prometheus.GaugeVec
+	networkErrors      *prometheus.GaugeVec
+	networkDrops       *prometheus.GaugeVec
 }
 
 func NewPrometheusDB() *PrometheusDB {
@@ -177,6 +185,48 @@ func NewPrometheusDB() *PrometheusDB {
 			},
 			[]string{"path"},
 		),
+		networkBytesSent: promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: "system_network_bytes_sent_total",
+				Help: "Number of bytes sent",
+			},
+			[]string{"interface"},
+		),
+		networkBytesRecv: promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: "system_network_bytes_recv_total",
+				Help: "Number of bytes received",
+			},
+			[]string{"interface"},
+		),
+		networkPacketsSent: promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: "system_network_packets_sent_total",
+				Help: "Number of packets sent",
+			},
+			[]string{"interface"},
+		),
+		networkPacketsRecv: promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: "system_network_packets_recv_total",
+				Help: "Number of packets received",
+			},
+			[]string{"interface"},
+		),
+		networkErrors: promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: "system_network_errors_total",
+				Help: "Number of network errors",
+			},
+			[]string{"interface", "direction"}, // direction: "in" or "out"
+		),
+		networkDrops: promauto.NewGaugeVec(
+			prometheus.GaugeOpts{
+				Name: "system_network_drops_total",
+				Help: "Number of dropped packets",
+			},
+			[]string{"interface", "direction"},
+		),
 	}
 }
 
@@ -247,4 +297,31 @@ func (p *PrometheusDB) SaveDiskMetrics(metrics *monitoring.DiskMetrics) {
 	p.diskWeightedIO.With(prometheus.Labels{
 		"path": metrics.Path,
 	}).Set(float64(metrics.WeightedIO))
+}
+
+func (p *PrometheusDB) SaveNetworkMetrics(metrics map[string]*monitoring.NetworkMetric) {
+	for iface, metric := range metrics {
+		p.networkBytesSent.With(prometheus.Labels{"interface": iface}).Set(float64(metric.BytesSent))
+		p.networkBytesRecv.With(prometheus.Labels{"interface": iface}).Set(float64(metric.BytesRecv))
+		p.networkPacketsSent.With(prometheus.Labels{"interface": iface}).Set(float64(metric.PacketsSent))
+		p.networkPacketsRecv.With(prometheus.Labels{"interface": iface}).Set(float64(metric.PacketsRecv))
+
+		p.networkErrors.With(prometheus.Labels{
+			"interface": iface,
+			"direction": "in",
+		}).Set(float64(metric.ErrIn))
+		p.networkErrors.With(prometheus.Labels{
+			"interface": iface,
+			"direction": "out",
+		}).Set(float64(metric.ErrOut))
+
+		p.networkDrops.With(prometheus.Labels{
+			"interface": iface,
+			"direction": "in",
+		}).Set(float64(metric.DropIn))
+		p.networkDrops.With(prometheus.Labels{
+			"interface": iface,
+			"direction": "out",
+		}).Set(float64(metric.DropOut))
+	}
 }
