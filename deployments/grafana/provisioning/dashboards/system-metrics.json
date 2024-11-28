@@ -618,7 +618,7 @@
             "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(system_network_bytes_sent_total{interface=\"all\"}[1m])",
+          "expr": "rate(system_network_bytes_sent_total{interface='eth0'}[1m])",
           "instant": false,
           "legendFormat": "Bytes Sent",
           "range": true,
@@ -629,7 +629,7 @@
             "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(system_network_bytes_recv_total{interface=\"all\"}[1m])",
+          "expr": "rate(system_network_bytes_recv_total{interface='eth0'}[1m])",
           "instant": false,
           "legendFormat": "Bytes Received",
           "range": true,
@@ -716,7 +716,7 @@
             "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(system_network_packets_sent_total{interface=\"all\"}[1m])",
+          "expr": "rate(system_network_packets_sent_total{interface='eth0'}[1m])",
           "instant": false,
           "legendFormat": "Packets Sent",
           "range": true,
@@ -727,7 +727,7 @@
             "type": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(system_network_packets_recv_total{interface=\"all\"}[1m])",
+          "expr": "rate(system_network_packets_recv_total{interface='eth0'}[1m])",
           "instant": false,
           "legendFormat": "Packets Received",
           "range": true,
