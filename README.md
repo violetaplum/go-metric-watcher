@@ -1,26 +1,44 @@
+
 # 🐱 go-metric-watcher
 
-실시간 시스템 메트릭 모니터링 및 알림 플랫폼
+Real-time System Metrics Monitoring and Alert Platform
 
-## 📊 주요 기능
+## 📊 Key Features
 
-### 시스템 모니터링
-- CPU, 메모리, 디스크 사용량 실시간 모니터링
-- API 응답시간 및 성능 지표 수집
-- 에러율 및 시스템 상태 추적
+### System Monitoring
+- Real-time monitoring of CPU, memory, and disk usage
+- Collection of API response times and performance metrics
+- Tracking of error rates and system status
 
-### 대시보드
-- Grafana 기반 실시간 메트릭 시각화
-- 커스텀 대시보드 구성
-- 히스토리 데이터 분석
+### Dashboard Features
+- Collection and monitoring of CPU, Memory, Disk and Network metrics
+- Metric storage through Prometheus
+- Dashboard visualization through Grafana
 
-### 알림 시스템
-- 임계값 기반 알림 설정
-- Slack/Email 알림 연동
-- 알림 이력 관리
+### Dashboard Panels
 
-## 🛠 기술 스택
+1. CPU Monitoring
+   - CPU Usage (%)
+   - CPU Core Count
 
+2. Memory Monitoring
+   - Memory Usage Overview
+   - Memory Usage (%)
+
+3. Disk Monitoring
+   - Disk Usage (%)
+   - Disk I/O
+
+4. Network Monitoring
+   - Network Traffic (Bytes)
+   - Network Packets
+
+### Alert System
+- Threshold-based alert configuration
+- Slack/Email notification integration
+- Alert history management
+
+## 🛠 Tech Stack
 - **Language:** Go
 - **Framework:** gRPC
 - **Database:** Prometheus
@@ -28,51 +46,7 @@
 - **Monitoring:** Custom Metrics Collector
 - **Infrastructure:** Docker, Docker Compose
 
-## 🚀 시작하기
-
-### 사전 요구사항
-
-```bash
-- Go 1.23 이상
-- Docker
-- Docker Compose
-```
-
-
-### 설치 방법
-
-```bash
-# 저장소 클론
-git clone https://github.com/violetaplum/go-metric-watcher
-
-# 의존성 설치
-go mod download
-
-# 빌드
-go build -o cmd/api/main.go
-go build -o cmd/collector/main.go
-
-```
-
-### 실행 방법
-
-
-```bash
-# 인프라 환경 구성
-make build
-
-# 직접실행
-go build -o api cmd/api/main.go
-go build -o collector cmd/collector/main.go
-
-./api
-./collector
-
-# go test 코드 실행
-go test ./...
-```
-
-## 📐 아키텍처
+## 📐 Architecture
 
 ```mermaid
 graph TD
@@ -83,7 +57,7 @@ graph TD
     E --> F[Notification Service]
 ```
 
-## 📁 프로젝트 구조
+## 📁 Project Structure
 
 ```
 .
@@ -123,19 +97,28 @@ graph TD
     └── prometheus.yml
 ```
 
-## 📌 API 문서
+## 📌 API Documentation
 ### Metrics API
-- `CollectMetrics`: 시스템 메트릭 수집
-- `StreamMetrics`: 실시간 메트릭 스트리밍
-- `GetMetricHistory`: 과거 메트릭 데이터 조회
+- `CollectMetrics`: Collect system metrics
+- `StreamMetrics`: Real-time metrics streaming
+- `GetMetricHistory`: Query historical metric data
 
 ### Alert API
-- `ConfigureAlert`: 알림 규칙 설정
+- `ConfigureAlert`: Configure alert rules
 
-## 🔧 설정
+## 🔧 Configuration
 
 
-### 알림 설정
+### Prometheus Configuration
+```yaml
+# prometheus/prometheus.yml
+scrape_configs:
+  - job_name: 'go-metric-watcher'
+    static_configs:
+      - targets: ['metrics-collector:2112']
+```
+
+### Alert Configuration
 ```yaml
 alerts:
   cpu_usage:
@@ -143,3 +126,72 @@ alerts:
     duration: 5m
     severity: warning
 ```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+```bash
+- Go 1.23 or higher
+- Docker
+- Docker Compose
+```
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/violetaplum/go-metric-watcher
+
+# Install dependencies
+go mod download
+
+# Build
+go build -o cmd/api/main.go
+go build -o cmd/collector/main.go
+```
+
+### Running the Application
+
+```bash
+# Set up infrastructure
+make build
+
+# Direct execution
+go build -o api cmd/api/main.go
+go build -o collector cmd/collector/main.go
+
+./api
+./collector
+
+# Run tests
+go test ./...
+```
+
+## 🌐 Accessing the Dashboard
+
+### Access Information
+- Grafana: http://localhost:3000
+- Prometheus: http://localhost:9090
+
+### Login Credentials
+- Username: admin
+- Password: admin
+
+### Available Services
+1. Grafana Dashboard
+    - System metrics visualization
+    - Custom dashboard templates
+    - Read-time monitoring
+2. Prometheus
+    - Metrics database
+    - Query interface
+    - Data exploration
+
+### Simple metric api call
+```bash
+curl http://localhost:8080/api/v1/health
+curl http://localhost:8080/api/v1/metrics
+```
+
+
