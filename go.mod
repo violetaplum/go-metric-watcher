@@ -5,6 +5,7 @@ go 1.23.2
 require (
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang/mock v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.23.0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/shirou/gopsutil v3.21.11+incompatible
