@@ -2,37 +2,42 @@ package notifier
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"net/http"
 )
 
 type SlackNotifier struct {
 	webhookURL string
+	channel    string
 }
 
-func NewSlackNotifier(webhookURL string) *SlackNotifier {
-	return &SlackNotifier{webhookURL: webhookURL}
+func NewSlackNotifier(webhookURL, channel string) *SlackNotifier {
+	return &SlackNotifier{
+		webhookURL: webhookURL,
+		channel:    channel,
+	}
 }
 
 func (s *SlackNotifier) Send(message string) error {
-	payload := map[string]string{
-		"text": message,
+	payload := map[string]interface{}{
+		"channel": s.channel,
+		"text":    message,
 	}
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("failed to marshal slack payload: %v", err)
+		return err
 	}
 
 	resp, err := http.Post(s.webhookURL, "application/json", bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		return fmt.Errorf("failed to send slack notification: %v", err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("slack notification failed with status: %d", resp.StatusCode)
 	}
-	return nil
+	return err
 }
