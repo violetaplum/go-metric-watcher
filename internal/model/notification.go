@@ -1,5 +1,7 @@
 package model
 
+import "os"
+
 type AlertThreshold struct {
 	CPUUsage    float64 `json:"cpu_usage"`
 	MemoryUsage float64 `json:"memory_usage"`
@@ -27,11 +29,18 @@ func DefaultConfig() *NotifierConfig {
 	config := &NotifierConfig{}
 
 	// 기본값 설정
-	config.Thresholds.CPUUsage = 80.0
-	config.Thresholds.MemoryUsage = 85.0
-	config.Thresholds.DiskUsage = 90.0
+	config.Thresholds.CPUUsage = 1.0
+	config.Thresholds.MemoryUsage = 1.0
+	config.Thresholds.DiskUsage = 1.0
 
 	config.Gmail.Host = "smtp.gmail.com"
 	config.Gmail.Port = 587
+	config.Gmail.Username = os.Getenv("GMAIL_USER_NAME")
+	config.Gmail.Password = os.Getenv("GMAIL_PW")
+	config.Gmail.To = []string{os.Getenv("GMAIL_TO")}
+
+	config.Slack.WebhookURL = os.Getenv("SLACK_WEBHOOK_URL")
+	config.Slack.Channel = os.Getenv("SLACK_CHANNEL")
+
 	return config
 }

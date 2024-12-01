@@ -7,10 +7,10 @@ import (
 )
 
 type GmailNotifier struct {
-	config model.NotifierConfig
+	config *model.NotifierConfig
 }
 
-func NewGmailNotifier(config model.NotifierConfig) *GmailNotifier {
+func NewGmailNotifier(config *model.NotifierConfig) *GmailNotifier {
 	return &GmailNotifier{config: config}
 }
 

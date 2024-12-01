@@ -6,6 +6,7 @@ import (
 	"github.com/violetaplum/go-metric-watcher/internal/model"
 	"github.com/violetaplum/go-metric-watcher/internal/repository"
 	"github.com/violetaplum/go-metric-watcher/pkg/monitoring"
+	"github.com/violetaplum/go-metric-watcher/pkg/notifier"
 	"log"
 	"net/http"
 	"sync"
@@ -21,6 +22,7 @@ type MetricProcessor struct {
 	metrics        []model.SystemMetric
 	collectionTime time.Duration
 	promDB         *repository.PrometheusDB
+	alertService   *notifier.AlertService
 }
 
 func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
@@ -31,6 +33,7 @@ func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
 		collectionTime: collectionTime,
 		promDB:         repository.NewPrometheusDB(),
 		networkMonitor: monitoring.NewNetworkMonitor(),
+		alertService:   notifier.NewAlertService(model.DefaultConfig()),
 	}
 }
 
@@ -102,7 +105,7 @@ func (mp *MetricProcessor) collect() error {
 		totalBytesSent += metric.BytesSent
 	}
 
-	mp.metrics = append(mp.metrics, model.SystemMetric{
+	metric := model.SystemMetric{
 		Timestamp:        time.Now(),
 		CPUUsage:         cpuMetrics.Usage,
 		MemoryUsage:      cpuMetrics.Usage,
@@ -113,7 +116,13 @@ func (mp *MetricProcessor) collect() error {
 		DiskFree:         diskMetrics.Free,
 		NetworkBytesRecv: totalBytesRecv,
 		NetworkBytesSent: totalBytesSent,
-	})
+	}
+
+	mp.metrics = append(mp.metrics, metric)
+
+	if err := mp.alertService.CheckMetricsAndAlert(metric); err != nil {
+		log.Printf("Failed to check alerts: %v", err)
+	}
 
 	return nil
 }

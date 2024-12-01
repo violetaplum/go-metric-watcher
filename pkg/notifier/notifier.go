@@ -14,7 +14,7 @@ type AlertService struct {
 	thresholds    model.AlertThreshold
 }
 
-func NewAlertService(config model.NotifierConfig) *AlertService {
+func NewAlertService(config *model.NotifierConfig) *AlertService {
 	return &AlertService{
 		slackNotifier: NewSlackNotifier(config.Slack.WebhookURL, config.Slack.Channel),
 		gmailNotifier: NewGmailNotifier(config),
