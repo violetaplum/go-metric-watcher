@@ -16,9 +16,9 @@ services:
 
   metrics-collector:
     environment:
-      - SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
+      - SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
       - SLACK_CHANNEL=#metric-alert
-      - GMAIL_USER_NAME=??
+      - GMAIL_USER_NAME=metricwatcher@gmail.com
       - GMAIL_PW=!Q2w3e4r5t6y
       - GMAIL_TO=violetaplume@gmail.com
     build:

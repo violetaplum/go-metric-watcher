@@ -5,6 +5,7 @@ import (
 	"github.com/violetaplum/go-metric-watcher/domain"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -44,6 +45,11 @@ func (a *AlertService) CheckMetricsAndAlert(metrics model.SystemMetric) error {
 		message := strings.Join(alerts, "\n")
 		if err := a.slackNotifier.Send(message); err != nil {
 			log.Printf("Failed to send Slack alert: %v", err)
+			log.Printf("Slack config: %v %v %v %v",
+				os.Getenv("SLACK_WEBHOOK_URL"),
+				os.Getenv("SLACK_CHANNEL"),
+				os.Getenv("GMAIL_USER_NAME"),
+				os.Getenv("GMAIL_PW"))
 		}
 
 		if err := a.gmailNotifier.Send(message); err != nil {
