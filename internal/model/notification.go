@@ -37,7 +37,10 @@ func DefaultConfig() *NotifierConfig {
 
 	config.Gmail.Host = "smtp.gmail.com"
 	config.Gmail.Port = 587
+
+	// deployments 하위에 환경변수 세팅해야함
 	config.Gmail.Username = os.Getenv("GMAIL_USER_NAME")
+	// 앱 비밀번호가 설정 돼 있는 계정 이메일 주소를 필요로 한다
 	config.Gmail.Password = os.Getenv("GOOGLE_APP_PW")
 	config.Gmail.To = []string{os.Getenv("GMAIL_TO")}
 
