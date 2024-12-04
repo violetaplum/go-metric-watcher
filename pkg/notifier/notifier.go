@@ -2,7 +2,6 @@ package notifier
 
 import (
 	"fmt"
-	"github.com/violetaplum/go-metric-watcher/domain"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
 	"log"
 	"os"
@@ -10,15 +9,28 @@ import (
 )
 
 type AlertService struct {
-	slackNotifier domain.Notifier
-	gmailNotifier domain.Notifier
+	slackNotifier *SlackNotifier
+	gmailNotifier *GmailNotifier
 	thresholds    model.AlertThreshold
 }
 
 func NewAlertService(config *model.NotifierConfig) *AlertService {
+	credPath := os.Getenv("GOOGLE_CREDENTIALS")
+	if credPath == "" {
+		log.Fatal("GOOGLE_CREDENTIALS is not set")
+	}
+	credBytes, err := os.ReadFile(credPath)
+	if err != nil {
+		log.Printf("failed to read google credential file: %v", err)
+	}
+	gmailNotifier, err := NewGmailNotifier(credBytes, os.Getenv("GMAIL_USER_NAME"))
+	if err != nil {
+		log.Printf("Failed to initialize Gmail notifier: %v", err)
+	}
+	fmt.Println("///////////gmailNotifier//////// ", gmailNotifier)
 	return &AlertService{
 		slackNotifier: NewSlackNotifier(config.Slack.WebhookURL, config.Slack.Channel),
-		gmailNotifier: NewGmailNotifier(config),
+		gmailNotifier: gmailNotifier,
 		thresholds:    config.Thresholds,
 	}
 }
@@ -51,8 +63,7 @@ func (a *AlertService) CheckMetricsAndAlert(metrics model.SystemMetric) error {
 				os.Getenv("GMAIL_USER_NAME"),
 				os.Getenv("GMAIL_PW"))
 		}
-
-		if err := a.gmailNotifier.Send(message); err != nil {
+		if err := a.gmailNotifier.Send([]string{os.Getenv("GMAIL_TO")}, "::GO-METRICS alert::", message); err != nil {
 			log.Printf("Failed to send Gmail alert: %v", err)
 		}
 	}

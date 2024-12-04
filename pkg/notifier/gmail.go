@@ -23,10 +23,14 @@ func NewGmailNotifier(credentialJSON []byte, fromEmail string) (*GmailNotifier, 
 		return nil, fmt.Errorf("failed to load credentials: %v", err)
 	}
 
+	fmt.Println("////// credentials /////// ", credentials)
+
 	service, err := gmail.NewService(ctx, option.WithCredentials(credentials))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gmail service: %v", err)
 	}
+
+	fmt.Println("////// service /////// ", service)
 
 	return &GmailNotifier{service: service, fromEmail: fromEmail}, nil
 }

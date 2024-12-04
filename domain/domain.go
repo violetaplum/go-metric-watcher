@@ -20,7 +20,3 @@ type ProcessorService interface {
 	GetMetricsByTimeRange(start, end time.Time) []model.SystemMetric
 	GetAverages() model.SystemMetricAverage
 }
-
-type Notifier interface {
-	Send(message string) error
-}

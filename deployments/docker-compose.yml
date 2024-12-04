@@ -13,14 +13,12 @@ services:
       - grafana
     networks:
       - monitoring
-
   metrics-collector:
     environment:
-      - SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
+      - GOOGLE_CREDENTIALS=${GOOGLE_CREDENTIALS}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       - SLACK_CHANNEL=#metric-alert
-      - GMAIL_USER_NAME=metricwatcher@gmail.com
-      - GMAIL_PW=!Q2w3e4r5t6y
-      - GMAIL_TO=violetaplume@gmail.com
+      - GMAIL_TO=${GMAIL_TO}
     build:
       context: ..
       dockerfile: deployments/Dockerfile
