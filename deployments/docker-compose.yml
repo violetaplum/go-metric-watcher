@@ -15,10 +15,11 @@ services:
       - monitoring
   metrics-collector:
     environment:
-      - GOOGLE_CREDENTIALS=${GOOGLE_CREDENTIALS}
+      - GOOGLE_APP_PW=${GOOGLE_APP_PW}
+      - GMAIL_USER_NAME=${GMAIL_USER_NAME}
+      - GMAIL_TO=${GMAIL_TO}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       - SLACK_CHANNEL=#metric-alert
-      - GMAIL_TO=${GMAIL_TO}
     build:
       context: ..
       dockerfile: deployments/Dockerfile

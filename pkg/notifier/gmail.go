@@ -1,57 +1,29 @@
 package notifier
 
 import (
-	"context"
-	"encoding/base64"
 	"fmt"
-	"golang.org/x/oauth2/google"
-	gmail "google.golang.org/api/gmail/v1"
-	"google.golang.org/api/option"
-	"strings"
+	"github.com/violetaplum/go-metric-watcher/internal/model"
+	"net/smtp"
 )
 
 type GmailNotifier struct {
-	service   *gmail.Service
-	fromEmail string
+	config *model.NotifierConfig
 }
 
-func NewGmailNotifier(credentialJSON []byte, fromEmail string) (*GmailNotifier, error) {
-	ctx := context.Background()
-
-	credentials, err := google.CredentialsFromJSON(ctx, credentialJSON, gmail.GmailComposeScope)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load credentials: %v", err)
-	}
-
-	fmt.Println("////// credentials /////// ", credentials)
-
-	service, err := gmail.NewService(ctx, option.WithCredentials(credentials))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Gmail service: %v", err)
-	}
-
-	fmt.Println("////// service /////// ", service)
-
-	return &GmailNotifier{service: service, fromEmail: fromEmail}, nil
+func NewGmailNotifier(config *model.NotifierConfig) *GmailNotifier {
+	return &GmailNotifier{config: config}
 }
 
-func (g *GmailNotifier) Send(to []string, subject, body string) error {
-	var message gmail.Message
+func (g *GmailNotifier) Send(message string) error {
+	auth := smtp.PlainAuth("", g.config.Gmail.Username,
+		g.config.Gmail.Password, g.config.Gmail.Host)
 
-	emailStr := fmt.Sprintf("From: %s\r\n"+
-		"To: %s\r\n"+
-		"Subject: %s\r\n"+
-		"\r\n%s",
-		g.fromEmail,
-		strings.Join(to, ","),
-		subject,
-		body)
+	msg := fmt.Sprintf("Subject: System Alert\n\n%s", message)
 
-	message.Raw = base64.URLEncoding.EncodeToString([]byte(emailStr))
-
-	_, err := g.service.Users.Messages.Send("me", &message).Do()
-	if err != nil {
-		return fmt.Errorf("[Send()] failed to send gmail: %v", err)
-	}
-	return nil
+	err := smtp.SendMail(fmt.Sprintf("%s:%d", g.config.Gmail.Host, g.config.Gmail.Port),
+		auth,
+		g.config.Gmail.Username,
+		g.config.Gmail.To,
+		[]byte(msg))
+	return err
 }

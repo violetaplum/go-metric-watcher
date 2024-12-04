@@ -1,6 +1,8 @@
 package model
 
-import "os"
+import (
+	"os"
+)
 
 type AlertThreshold struct {
 	CPUUsage    float64 `json:"cpu_usage"`
@@ -36,7 +38,7 @@ func DefaultConfig() *NotifierConfig {
 	config.Gmail.Host = "smtp.gmail.com"
 	config.Gmail.Port = 587
 	config.Gmail.Username = os.Getenv("GMAIL_USER_NAME")
-	config.Gmail.Password = os.Getenv("GMAIL_PW")
+	config.Gmail.Password = os.Getenv("GOOGLE_APP_PW")
 	config.Gmail.To = []string{os.Getenv("GMAIL_TO")}
 
 	config.Slack.WebhookURL = os.Getenv("SLACK_WEBHOOK_URL")
