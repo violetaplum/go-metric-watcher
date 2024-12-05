@@ -7,8 +7,14 @@ services:
       target: metrics-api #Dockerfile 의 "AS metrics-api" 스테이지를 사용
     ports:
       - "8080:8080"
+    environment:
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=metrics_db
     depends_on:
-#      - timescaledb
+      - timescaledb
       - prometheus
       - grafana
     networks:
@@ -20,6 +26,11 @@ services:
       - GMAIL_TO=${GMAIL_TO}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       - SLACK_CHANNEL=#metric-alert
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=metrics_db
     build:
       context: ..
       dockerfile: deployments/Dockerfile
@@ -27,32 +38,32 @@ services:
     ports:
       - "2112:2112"
     depends_on:
-#      - timescaledb
+      - timescaledb
       - prometheus
       - grafana
     networks:
       - monitoring
 
-#  timescaledb:
-#    image: timescale/timescaledb:latest-pg14
-#    ports:
-#      - "5432:5432"
-#    environment:
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=password
-#      #      - POSTGRES_DB=metrics_db
-#      - TIMESCALEDB_PRELOAD_SHARED_LIBRARIES=timescaledb
-#    volumes:
-#      - timescaledb_data:/var/lib/postgresql/data
-#      - ./init-scripts:/docker-entrypoint-initdb.d  # 초기화 스크립트 경로
-#    networks:
-#      - monitoring
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U postgres -d metrics_db"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#      start_period: 10s
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=metrics_db
+      - TIMESCALEDB_PRELOAD_SHARED_LIBRARIES=timescaledb
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d  # 초기화 스크립트 경로
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d metrics_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   prometheus:
     image: prom/prometheus:latest
@@ -68,8 +79,8 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-#    depends_on:
-#      - timescaledb
+    depends_on:
+      - timescaledb
 
   #  prometheus-adapter:
   #    image: timescale/timescale-prometheus:0.1.0-beta.4
@@ -122,7 +133,7 @@ networks:
 
 
 volumes:
-#  timescaledb_data: # TimescaleDB용 볼륨
+  timescaledb_data: # TimescaleDB용 볼륨
   grafana_data:     # Grafana용 볼륨
   prometheus_data:  # Prometheus 데이터를 위한 볼륨
 

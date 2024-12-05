@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
 	"github.com/violetaplum/go-metric-watcher/pkg/monitoring"
 	"time"
@@ -19,4 +20,11 @@ type ProcessorService interface {
 	GetLatestMetric() (model.SystemMetric, error)
 	GetMetricsByTimeRange(start, end time.Time) []model.SystemMetric
 	GetAverages() model.SystemMetricAverage
+}
+
+type AlertHistoryRepository interface {
+	Create(ctx context.Context, history *model.AlertHistory) error
+	Update(ctx context.Context, history *model.AlertHistory) error
+	GetByAlertRuleID(ctx context.Context, alertRuleID uint) ([]model.AlertHistory, error)
+	GetByTimeRange(ctx context.Context, start, end time.Time) ([]model.AlertHistory, error)
 }
