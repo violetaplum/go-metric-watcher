@@ -1,8 +1,6 @@
 package model
 
 import (
-	watcherPb "github.com/violetaplum/go-metric-watcher/proto/gen/go/metrics/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -31,17 +29,4 @@ type SystemMetricAverage struct {
 	CPUUsage    float64
 	MemoryUsage float64
 	DiskUsage   float64
-}
-
-func (m *SystemMetric) ToProto() *watcherPb.SystemMetric {
-	return &watcherPb.SystemMetric{
-		Timestamp:   timestamppb.New(m.Timestamp),
-		CpuUsage:    m.CPUUsage,
-		MemoryUsage: m.MemoryUsage,
-		MemoryTotal: m.MemoryTotal,
-		MemoryFree:  m.MemoryFree,
-		DiskUsage:   m.DiskUsage,
-		DiskTotal:   m.DiskTotal,
-		DiskFree:    m.DiskFree,
-	}
 }
