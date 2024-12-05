@@ -3,10 +3,12 @@ package service
 import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/violetaplum/go-metric-watcher/domain"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
 	"github.com/violetaplum/go-metric-watcher/internal/repository"
 	"github.com/violetaplum/go-metric-watcher/pkg/monitoring"
 	"github.com/violetaplum/go-metric-watcher/pkg/notifier"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"sync"
@@ -14,26 +16,28 @@ import (
 )
 
 type MetricProcessor struct {
-	mu             sync.RWMutex
-	cpuMonitor     *monitoring.CPUMonitor
-	memoryMonitor  *monitoring.MemoryMonitor
-	diskMonitor    *monitoring.DiskMonitor
-	networkMonitor *monitoring.NetworkMonitor
-	metrics        []model.SystemMetric
-	collectionTime time.Duration
-	promDB         *repository.PrometheusDB
-	alertService   *notifier.AlertService
+	mu              sync.RWMutex
+	cpuMonitor      *monitoring.CPUMonitor
+	memoryMonitor   *monitoring.MemoryMonitor
+	diskMonitor     *monitoring.DiskMonitor
+	networkMonitor  *monitoring.NetworkMonitor
+	metrics         []model.SystemMetric
+	collectionTime  time.Duration
+	promDB          *repository.PrometheusDB
+	alertService    *notifier.AlertService
+	alertRepository domain.AlertHistoryRepository
 }
 
-func NewMetricProcessor(collectionTime time.Duration) *MetricProcessor {
+func NewMetricProcessor(collectionTime time.Duration, db *gorm.DB) *MetricProcessor {
 	return &MetricProcessor{
-		cpuMonitor:     monitoring.NewCPUMonitor(),
-		memoryMonitor:  monitoring.NewMemoryMonitor(),
-		diskMonitor:    monitoring.NewDiskMonitor("/"),
-		collectionTime: collectionTime,
-		promDB:         repository.NewPrometheusDB(),
-		networkMonitor: monitoring.NewNetworkMonitor(),
-		alertService:   notifier.NewAlertService(model.DefaultConfig()),
+		cpuMonitor:      monitoring.NewCPUMonitor(),
+		memoryMonitor:   monitoring.NewMemoryMonitor(),
+		diskMonitor:     monitoring.NewDiskMonitor("/"),
+		collectionTime:  collectionTime,
+		promDB:          repository.NewPrometheusDB(),
+		networkMonitor:  monitoring.NewNetworkMonitor(),
+		alertService:    notifier.NewAlertService(model.DefaultConfig()),
+		alertRepository: repository.NewAlertHistoryRepository(db),
 	}
 }
 

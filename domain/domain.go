@@ -23,8 +23,9 @@ type ProcessorService interface {
 }
 
 type AlertHistoryRepository interface {
-	Create(ctx context.Context, history *model.AlertHistory) error
-	Update(ctx context.Context, history *model.AlertHistory) error
-	GetByAlertRuleID(ctx context.Context, alertRuleID uint) ([]model.AlertHistory, error)
-	GetByTimeRange(ctx context.Context, start, end time.Time) ([]model.AlertHistory, error)
+	SaveAlert(ctx context.Context, history *model.AlertHistory) error
+	UpdateAlert(ctx context.Context, history *model.AlertHistory) error
+	GetAlertsByTimeRange(ctx context.Context, start, end time.Time) ([]model.AlertHistory, error)
+	GetAlertsByRuleID(ctx context.Context, ruleID int64) ([]model.AlertHistory, error)
+	GetUnresolvedAlerts(ctx context.Context) ([]model.AlertHistory, error)
 }

@@ -15,11 +15,17 @@ type AlertRule struct {
 }
 
 type AlertHistory struct {
-	ID          uint       `json:"id"`
-	AlertRuleID uint       `json:"alert_rule_id"`
-	Status      string     `json:"status"`
-	Description string     `json:"description"`
-	Metric      float64    `json:"metric"`
-	CreatedAt   time.Time  `json:"created_at"`
-	ResolvedAt  *time.Time `json:"resolved_at,omitempty"`
+	ID             uint      `gorm:"primaryKey"`
+	Time           time.Time `gorm:"index;not null"`
+	AlertRuleID    int64     `gorm:"index;not null"`
+	MetricName     string    `gorm:"type:varchar(100);not null"`
+	MetricValue    float64   `gorm:"not null"`
+	ThresholdValue float64   `gorm:"not null"`
+	Status         string    `gorm:"type:varchar(20);not null"` // triggered, resolved
+	Description    string    `gorm:"type:text"`
+	ResolvedAt     *time.Time
+	TargetSystem   string    `gorm:"type:varchar(100);not null"`
+	Severity       string    `gorm:"type:varchar(20);not null"`
+	CreatedAt      time.Time `gorm:"autoCreateTime"`
+	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
 }

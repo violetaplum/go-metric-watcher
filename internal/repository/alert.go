@@ -2,47 +2,51 @@ package repository
 
 import (
 	"context"
+	"github.com/violetaplum/go-metric-watcher/domain"
 	"github.com/violetaplum/go-metric-watcher/internal/model"
-	"sync"
+	"gorm.io/gorm"
+	"time"
 )
 
-type AlertRepository struct {
-	rules map[string]*model.AlertRule
-	mutex sync.RWMutex
+type AlertHistoryRepository struct {
+	db *gorm.DB
 }
 
-func NewAlertRepository() *AlertRepository {
-	return &AlertRepository{
-		rules: make(map[string]*model.AlertRule),
-	}
+func (a AlertHistoryRepository) SaveAlert(ctx context.Context, history *model.AlertHistory) error {
+	return a.db.WithContext(ctx).Create(history).Error
 }
 
-func (r *AlertRepository) Save(ctx context.Context, rule *model.AlertRule) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	r.rules[rule.ID] = rule
-	return nil
+func (a AlertHistoryRepository) UpdateAlert(ctx context.Context, history *model.AlertHistory) error {
+	return a.db.WithContext(ctx).Save(history).Error
 }
 
-func (r *AlertRepository) FindByID(ctx context.Context, id string) (*model.AlertRule, error) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	if rule, exists := r.rules[id]; exists {
-		return rule, nil
-	}
-
-	return nil, nil
+func (a AlertHistoryRepository) GetAlertsByTimeRange(ctx context.Context, start, end time.Time) ([]model.AlertHistory, error) {
+	var histories []model.AlertHistory
+	err := a.db.WithContext(ctx).
+		Where("time BETWEEN ? AND ?", start, end).
+		Order("time DESC").
+		Find(&histories).Error
+	return histories, err
 }
 
-func (r *AlertRepository) FindAll(ctx context.Context) ([]*model.AlertRule, error) {
-	r.mutex.RLock() // RLock(): 읽기잠금    Lock(): 쓰기잠금
-	defer r.mutex.RUnlock()
+func (a AlertHistoryRepository) GetAlertsByRuleID(ctx context.Context, ruleID int64) ([]model.AlertHistory, error) {
+	var histories []model.AlertHistory
+	err := a.db.WithContext(ctx).
+		Where("alert_rule_id = ?", ruleID).
+		Order("time DESC").
+		Find(&histories).Error
+	return histories, err
+}
 
-	rules := make([]*model.AlertRule, 0, len(r.rules))
-	for _, rule := range r.rules {
-		rules = append(rules, rule)
-	}
-	return rules, nil
+func (a AlertHistoryRepository) GetUnresolvedAlerts(ctx context.Context) ([]model.AlertHistory, error) {
+	var histories []model.AlertHistory
+	err := a.db.WithContext(ctx).
+		Where("status = ?", "triggered").
+		Order("time DESC").
+		Find(&histories).Error
+	return histories, err
+}
+
+func NewAlertHistoryRepository(db *gorm.DB) domain.AlertHistoryRepository {
+	return &AlertHistoryRepository{db: db}
 }
