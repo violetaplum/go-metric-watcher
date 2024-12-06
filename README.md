@@ -61,40 +61,67 @@ graph TD
 
 ```
 .
-├── cmd/
-│   ├── api/
-│   │   └── main.go
-│   └── collector/
-│       └── main.go
-├── deployments/
-│   └── grafana/
-│       ├── provisioning/
-│       │   └── init-scripts/
-│       │       └── 01-init.sql
-│       ├── docker-compose.yml
-│       └── Dockerfile
-├── internal/
-│   ├── model/
-│   │   └── metric.go
-│   ├── repository/
-│   │   └── timescaledb.go
-│   └── service/
-│       ├── collector.go
-│       └── metrics.go
-├── pkg/
-│   ├── grpcutil/
-│   │   └── server.go
-│   ├── logger/
-│   │   └── logger.go
-│   ├── monitoring/
-│   │   ├── cpu.go
-│   │   ├── disk.go
-│   │   └── memory.go
-│   └── notifier/
-│       ├── email.go
-│       └── slack.go
-└── prometheus/
-    └── prometheus.yml
+├── README.md
+├── cmd
+│   ├── api
+│   │	└── main.go
+│   └── collector
+│	└── main.go
+├── deployments
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── grafana
+│   │	└── provisioning
+│   │	    ├── dashboards
+│   │	    │	├── alert-history.json
+│   │	    │	├── dashboards.yaml
+│   │	    │	└── system-metrics.json
+│   │	    └── datasources
+│   │		├── prometheus.yaml
+│   │		└── timescaledb.yaml
+│   ├── init-scripts
+│   │	└── 01-init.sql
+│   └── prometheus
+│	└── prometheus.yml
+├── domain
+│   ├── domain.go
+│   └── mocks
+│	└── mock_domain.go
+├── go.mod
+├── go.sum
+├── internal
+│   ├── model
+│   │	├── alert_rule.go
+│   │	├── notification.go
+│   │	└── system_metric.go
+│   ├── repository
+│   │	├── alert.go
+│   │	└── database.go
+│   └── service
+│	├── metric_processor.go
+│	├── processor_benchmark_test.go
+│	└── processor_test.go
+├── makefile
+└── pkg
+    ├── database
+    │	└── database.go
+    ├── grpcutil
+    │	└── server.go
+    ├── logger
+    │	└── logger.go
+    ├── monitoring
+    │	├── cpu.go
+    │	├── disk.go
+    │	├── memory.go
+    │	├── monitoring_test.go
+    │	└── network.go
+    └── notifier
+	├── gmail.go
+	├── notifier.go
+	├── notifier_test.go
+	└── slack.go
+
+23 directories, 37 files
 ```
 
 ## 📌 API Documentation
