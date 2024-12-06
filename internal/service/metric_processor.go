@@ -248,6 +248,7 @@ func (mp *MetricProcessor) checkAndSaveAlerts(metric model.SystemMetric) error {
 			Status:         "triggered",
 			Description: fmt.Sprintf("Disk usage (%.2f%%) exceeded threshold (%.2f%%)",
 				metric.DiskUsage, config.Thresholds.DiskUsage),
+			ResolvedAt:   nil,
 			TargetSystem: "system",
 			Severity:     "warning",
 		}

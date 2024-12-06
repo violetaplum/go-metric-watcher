@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 -- 알림 히스토리 테이블 생성
 CREATE TABLE IF NOT EXISTS alert_histories (
-                                               id BIGSERIAL,
+                                               id BIGSERIAL UNIQUE,
                                                time TIMESTAMPTZ NOT NULL,
                                                alert_rule_id BIGINT NOT NULL,
                                                metric_name TEXT NOT NULL,
