@@ -14,11 +14,16 @@ services:
       - DB_PASSWORD=password
       - DB_NAME=metrics_db
     depends_on:
-      - timescaledb
-      - prometheus
-      - grafana
+      timescaledb:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+      grafana:
+        condition: service_started
     networks:
       - monitoring
+
+
   metrics-collector:
     environment:
       - GOOGLE_APP_PW=${GOOGLE_APP_PW}
@@ -38,9 +43,12 @@ services:
     ports:
       - "2112:2112"
     depends_on:
-      - timescaledb
-      - prometheus
-      - grafana
+      timescaledb:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+      grafana:
+        condition: service_started
     networks:
       - monitoring
 
@@ -63,7 +71,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
 
   prometheus:
     image: prom/prometheus:latest

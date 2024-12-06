@@ -24,8 +24,6 @@ type AlertHistory struct {
 	Status         string    `gorm:"type:varchar(20);not null"` // triggered, resolved
 	Description    string    `gorm:"type:text"`
 	ResolvedAt     *time.Time
-	TargetSystem   string    `gorm:"type:varchar(100);not null"`
-	Severity       string    `gorm:"type:varchar(20);not null"`
-	CreatedAt      time.Time `gorm:"autoCreateTime"`
-	UpdatedAt      time.Time `gorm:"autoUpdateTime"`
+	TargetSystem   string `gorm:"type:varchar(100);not null"`
+	Severity       string `gorm:"type:varchar(20);not null"`
 }

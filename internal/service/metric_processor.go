@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/violetaplum/go-metric-watcher/domain"
@@ -128,6 +129,11 @@ func (mp *MetricProcessor) collect() error {
 		log.Printf("Failed to check alerts: %v", err)
 	}
 
+	// 알림 히스토리 저장 함수 추가
+	if err := mp.checkAndSaveAlerts(metric); err != nil {
+		log.Printf("Failed to save alert history: %v", err)
+	}
+
 	return nil
 }
 
@@ -193,4 +199,87 @@ func (mp *MetricProcessor) GetAverages() model.SystemMetricAverage {
 	avg.DiskUsage /= count
 
 	return avg
+}
+
+func (mp *MetricProcessor) checkAndSaveAlerts(metric model.SystemMetric) error {
+	ctx := context.Background()
+	config := model.DefaultConfig()
+
+	if metric.CPUUsage > config.Thresholds.CPUUsage {
+		alertHistory := &model.AlertHistory{
+			Time:           metric.Timestamp,
+			AlertRuleID:    1,
+			MetricName:     "cpu",
+			ThresholdValue: config.Thresholds.CPUUsage,
+			Status:         "triggered",
+			Description:    fmt.Sprintf("CPU usage (%.2f%%) exceeded threshold (%.2f%%)", metric.CPUUsage, config.Thresholds.CPUUsage),
+			TargetSystem:   "system",
+			Severity:       "critical",
+		}
+		if err := mp.alertRepository.SaveAlert(ctx, alertHistory); err != nil {
+			log.Printf("Failed to save cpu alert: %v", err)
+		}
+	}
+
+	if metric.MemoryUsage > config.Thresholds.MemoryUsage {
+		alertHistory := &model.AlertHistory{
+			Time:           metric.Timestamp,
+			AlertRuleID:    2,
+			MetricName:     "memory",
+			ThresholdValue: config.Thresholds.MemoryUsage,
+			Status:         "triggered",
+			Description: fmt.Sprintf("Memory usage (%.2f%%) exceeded threshold (%.2f%%)",
+				metric.MemoryUsage, config.Thresholds.MemoryUsage),
+			TargetSystem: "system",
+			Severity:     "warning",
+		}
+		if err := mp.alertRepository.SaveAlert(ctx, alertHistory); err != nil {
+			log.Printf("Failed to save memory alert: %v", err)
+		}
+	}
+
+	if metric.DiskUsage > config.Thresholds.DiskUsage {
+		alertHistory := &model.AlertHistory{
+			Time:           metric.Timestamp,
+			AlertRuleID:    3, // Disk Rule ID
+			MetricName:     "disk",
+			MetricValue:    metric.DiskUsage,
+			ThresholdValue: config.Thresholds.DiskUsage,
+			Status:         "triggered",
+			Description: fmt.Sprintf("Disk usage (%.2f%%) exceeded threshold (%.2f%%)",
+				metric.DiskUsage, config.Thresholds.DiskUsage),
+			TargetSystem: "system",
+			Severity:     "warning",
+		}
+		if err := mp.alertRepository.SaveAlert(ctx, alertHistory); err != nil {
+			log.Printf("Failed to save disk alert: %v", err)
+		}
+	}
+
+	unresolvedAlerts, err := mp.alertRepository.GetUnresolvedAlerts(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get unresolved alerts: %v", err)
+	}
+
+	for _, alert := range unresolvedAlerts {
+		isResolved := false
+		switch alert.MetricName {
+		case "cpu":
+			isResolved = metric.CPUUsage < alert.ThresholdValue
+		case "memory":
+			isResolved = metric.MemoryUsage < alert.ThresholdValue
+		case "disk":
+			isResolved = metric.DiskUsage < alert.ThresholdValue
+		}
+		if isResolved {
+			now := time.Now()
+			alert.Status = "resolved"
+			alert.ResolvedAt = &now
+			if err := mp.alertRepository.UpdateAlert(ctx, &alert); err != nil {
+				log.Printf("Failed to update resolved alert: %v", err)
+			}
+		}
+	}
+
+	return nil
 }
